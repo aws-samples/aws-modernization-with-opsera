@@ -4,9 +4,7 @@ chapter = false
 weight = 17
 +++
 
-
-Your account must have the ability to have Administrative Access
-
+{{% notice warning %}}Your account must have the ability to have Administrative Access{{% /notice %}}
 
 # Deploying the CloudFormation Templates  
 

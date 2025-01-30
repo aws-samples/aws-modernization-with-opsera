@@ -3,11 +3,7 @@ title = At an AWS Guided Event
 weight = 02
 +++
 
-
-
-This section only applies if you are participating in an AWS guided event.
-
-
+{{% notice info %}}This section only applies if you are participating in an AWS guided event.{{% /notice %}}
 
 ## AWS Account
 

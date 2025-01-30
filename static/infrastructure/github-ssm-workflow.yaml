@@ -1,0 +1,94 @@
+name: Create Neon Twin
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  PG_VERSION: '16'
+
+jobs:
+  sync-db:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ACCOUNT_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Add Runner IP to Security Group
+        id: ip_setup
+        run: |
+          # Get runner's IP
+          RUNNER_IP=$(curl -s ifconfig.me)
+          echo "RUNNER_IP=$RUNNER_IP" >> $GITHUB_ENV
+          
+          # Add to security group with description
+          aws ec2 authorize-security-group-ingress \
+            --group-id ${{ secrets.RDS_SECURITY_GROUP_ID }} \
+            --protocol tcp \
+            --port 5432 \
+            --cidr ${RUNNER_IP}/32 \
+            --description "GitHub Actions Runner - $(date +%Y%m%d-%H%M%S)"
+          
+          echo "Added IP ${RUNNER_IP} to security group"
+
+      - name: Install PostgreSQL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-${{ env.PG_VERSION }}
+
+      - name: Get Database Credentials
+        run: |
+          DB_HOST=$(aws ssm get-parameter --name '/rds/db-endpoint' --query 'Parameter.Value' --output text)
+          DB_USER=$(aws ssm get-parameter --name '/rds/db-username' --query 'Parameter.Value' --output text)
+          DB_PASS=$(aws ssm get-parameter --name '/rds/db-password' --with-decryption --query 'Parameter.Value' --output text)
+          
+          echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
+          echo "DB_USER=$DB_USER" >> $GITHUB_ENV
+          echo "DB_PASS=$DB_PASS" >> $GITHUB_ENV
+
+      - name: Dump RDS Database
+        run: |
+          echo "Starting database dump..."
+          PGPASSWORD="${{ env.DB_PASS }}" pg_dump \
+            -h "${{ env.DB_HOST }}" \
+            -U "${{ env.DB_USER }}" \
+            -d employees \
+            -Fc -f dump.dump
+          
+          echo "Database dump completed"
+
+      - name: Restore to Neon
+        run: |
+          echo "Starting restore to Neon..."
+          pg_restore \
+            -d "${{ secrets.DEV_DATABASE_URL }}" \
+            --clean --no-owner --no-acl --if-exists \
+            dump.dump
+          
+          echo "Restore to Neon completed"
+
+      - name: Remove Runner IP
+        if: always()  # Run even if previous steps fail
+        run: |
+          echo "Removing IP ${RUNNER_IP} from security group..."
+          aws ec2 revoke-security-group-ingress \
+            --group-id ${{ secrets.RDS_SECURITY_GROUP_ID }} \
+            --protocol tcp \
+            --port 5432 \
+            --cidr ${RUNNER_IP}/32
+          
+          echo "Removed IP from security group"
+
+      - name: Cleanup
+        if: always()
+        run: |
+          echo "Cleaning up temporary files..."
+          rm -f dump.dump
+          echo "Cleanup completed"

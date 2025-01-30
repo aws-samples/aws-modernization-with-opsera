@@ -112,10 +112,13 @@ Resources:
                 Effect: Allow
                 Action:
                   - ssm:GetParameter
+                  - ssm:GetParameters
+                  
                 Resource:
                   - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/rds/db-username"
                   - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/rds/db-password"
-                  - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/rds/connection-string"
+                  - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/rds/connection-string",
+                  - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/rds/db-endpoint"
       
               - Sid: EC2Read
                 Effect: Allow
@@ -138,6 +141,15 @@ Resources:
                   - ssm:ResumeSession
                 Resource:
                   - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:session/*"
+                  
+              - Sid: EC2SecurityGroupManagement
+                Effect: Allow
+                Action:
+                  - ec2:AuthorizeSecurityGroupIngress
+                  - ec2:RevokeSecurityGroupIngress
+                  - ec2:DescribeSecurityGroups
+                Resource: 
+                  - !Sub "arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:security-group/*"
 
 
 Outputs:
