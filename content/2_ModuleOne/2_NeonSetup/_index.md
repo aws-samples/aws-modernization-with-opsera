@@ -10,23 +10,7 @@ Amazon RDS for PostgreSQL is a solid, established solution that has been instrum
 ##  How Neon Complements Amazon RDS for Development 
 
 | Advantages with Neon | Module Objective |
-|+++
-title = " Neon Set Up Instructions " # MODIFY THIS TITLE IF APPLICABLE
-chapter = true
-weight = 20
-++++++
-title = " Neon Set Up Instructions " # MODIFY THIS TITLE IF APPLICABLE
-chapter = true
-weight = 20
-+++-|+++
-title = " Neon Set Up Instructions " # MODIFY THIS TITLE IF APPLICABLE
-chapter = true
-weight = 20
-++++++
-title = " Neon Set Up Instructions " # MODIFY THIS TITLE IF APPLICABLE
-chapter = true
-weight = 20
-+++-----|
+|-------------|-----------------|
 | Faster Provisioning of resources with Neon | Understanding the time and effort required to set up and configure RDS vs Neon instances for development purposes. |
 | Improve collaboration with Neon | Exploring the ease with which teams can collaborate in development environments using Neon. |
 | Improve Data Synchronization Across Environments | Identifying problems related to keeping data in sync between production and development environments and walkthrough of how Neon is addressing these challenges. |

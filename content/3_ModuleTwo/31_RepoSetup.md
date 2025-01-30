@@ -12,7 +12,7 @@ In this section, we'll create the GitHub repository that will host our database 
 
 1. Go to [GitHub](https://github.com/new) and sign in
 
-![Create New Repo](images/create-new-repo.png)
+![Create New Repo](/images/create-new-repo.png)
 
 3. Configure your repository:
    - Enter a repository name (e.g., `neon-rds-workshop`)

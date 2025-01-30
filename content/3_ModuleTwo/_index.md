@@ -10,11 +10,19 @@ Welcome to Module 2! In this module, you'll set up the foundational pieces that 
 
 Let's dive in and learn how these components fit together to power your workshop environment!
 
-+++
-title = "Secure Authentication Setup: Connecting GitHub Actions with AWS OIDC"
-chapter = true
-weight = 30
-+++
+---
+
+## 🧐 What is OIDC?
+
+**OIDC** (OpenID Connect) is an identity layer built on top of **OAuth 2.0**. It allows applications (like GitHub Actions) to securely authenticate with identity providers (like AWS). In this workshop, OIDC helps GitHub Actions assume an AWS role without requiring long-term access keys.
+
+### Why OIDC?
+
+- **No need for access keys**: It eliminates the need to store AWS credentials in GitHub Secrets, reducing the risk of exposure.
+- **Secure and dynamic**: GitHub Actions generates short-term tokens that AWS verifies, ensuring a secure connection.
+- **Simplified setup**: AWS manages permissions dynamically based on the role you configure.
+
+---
 
 ## 🛠️ Key Steps in this Module
 
@@ -43,11 +51,30 @@ Finally, you'll create a GitHub Actions workflow that uses OIDC authentication t
 
 > **End goal**: A fully automated data synchronization pipeline for a fresh and reliable development environment!
 
-+++
-title = "Secure Authentication Setup: Connecting GitHub Actions with AWS OIDC"
-chapter = true
-weight = 30
-+++
+---
+
+## 💡 Concepts to Understand Before Moving On
+
+Here are some important terms and tools you'll encounter in this module:
+
+### 🔒 **GitHub Secrets**
+A secure way to store sensitive data like database connection strings and AWS credentials. You'll configure secrets like:
+- `PROD_DATABASE_URL`: Connection string for your RDS database.
+- `DEV_DATABASE_URL`: Connection string for your Neon database.
+
+### ☁️ **CloudFormation**
+AWS CloudFormation automates the creation of resources like IAM roles and trust policies. You'll use it to set up OIDC authentication.
+
+### ⚙️ **GitHub Actions**
+A powerful tool for automating CI/CD workflows. In this workshop, GitHub Actions will:
+- Authenticate with AWS using OIDC.
+- Dump data from RDS.
+- Restore data to Neon.
+
+### 📅 **Cron Scheduling**
+A time-based scheduler that allows workflows to run automatically. You'll use a daily schedule to keep your Neon database in sync with RDS.
+
+---
 
 ## 🎯 Learning Outcomes
 

@@ -13,7 +13,7 @@ In this section, we'll set up OIDC authentication between GitHub Actions and AWS
 1. Download the CloudFormation template from our GitHub repository:
    - Download `https://github.com/aws-samples/aws-modernization-with-neon/blob/main/static/infrastructure/github-oidc.yaml` to your local machine
 
-![Download Template](images/download-template.png)
+![Download Template](/images/download-template.png)
 
 ## 🚀 Deploying the Template
 
@@ -25,7 +25,7 @@ In this section, we'll set up OIDC authentication between GitHub Actions and AWS
    - Select the `github-oidc.yaml` you downloaded
    - Click "Next"
 
-![Upload Template](images/upload-template.png)
+![Upload Template](/images/upload-template.png)
 
 ## 📝 Stack Configuration
 
@@ -34,7 +34,7 @@ In this section, we'll set up OIDC authentication between GitHub Actions and AWS
    - **Owners**: Your GitHub username
    - **RepositoriesPerOwner**: Your repository name (or `*` for all repositories)
 
-![Stack Parameters](images/stack-parameters.png)
+![Stack Parameters](/images/stack-parameters.png)
 
 2. Click "Next" through the stack options
 3. Review and click "Create stack"
@@ -47,7 +47,7 @@ Once the stack creation is complete:
 2. Find the "GitHubActionsRoleArn"
 3. Copy this value - we'll use it in our next steps!
 
-![Stack Outputs](images/stack-outputs.png)
+![Stack Outputs](/images/stack-outputs.png)
 
 ## 🎯 Next Steps
 

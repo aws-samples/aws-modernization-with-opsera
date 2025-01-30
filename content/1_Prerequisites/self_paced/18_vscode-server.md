@@ -15,7 +15,7 @@ weight = 18
   - **VSCODEURL**: This is the URL to access the VS Code server.
   - **Password**: This is the password required to log in to the server.
 
-![CloudFormation Outputs](images/cloudformation-outputs.png)
+![CloudFormation Outputs](/images/cloudformation-outputs.png)
 
 ## Step 2: Copy the Password
 
@@ -26,7 +26,7 @@ weight = 18
 - Click on the **VSCODEURL** link in the CloudFormation Outputs section.
 - A browser window will open, prompting you to enter a password.
 
-![VS Code Login](images/Vscode-server-login.png)
+![VS Code Login](/images/Vscode-server-login.png)
 
 ## Step 4: Enter the Password
 
@@ -37,6 +37,6 @@ weight = 18
 
 - You now have access to the VS Code server, which is securely fronted by CloudFront.
 
-![VS Code Interface](images/Vscode-server-interface.png)
+![VS Code Interface](/images/Vscode-server-interface.png)
 
 **Note**: Ensure you use the latest version of your browser for the best experience. If you encounter issues accessing the server, try clearing your browser cache or contacting the workshop support team.

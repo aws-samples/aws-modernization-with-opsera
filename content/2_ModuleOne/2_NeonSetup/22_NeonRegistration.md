@@ -14,11 +14,11 @@ If you’re new to Neon, the first step is to [sign up](https://console.neon.te
 
 After you have signed up for a Neon account, follow our [getting started guide](https://neon.tech/docs/get-started-with-neon/signing-up) to create your initial project
 
-![Neon Project Creation](images/neon-project-creation.png)
+![Neon Project Creation](/images/neon-project-creation.png)
 
 You will be introduced to these key Neon terms:
 
-![Neon Object Hierarchy](images/Neondatabasedr.png)
+![Neon Object Hierarchy](/images/Neondatabasedr.png)
 
 - **Project:** The top-level container for your Neon databases—the logical equivalent to an “instance” in RDS.
 - **Branch:** A versioned copy of your database environment. Each Neon project can have multiple branches, as we will see later.
@@ -38,7 +38,7 @@ Neon is built on an innovative [branch-based architecture](https://neon.tech/do
 - Click on the project for which you want to find the connection string. 
 - In the left-hand menu, locate and click on "Connection Details" or "Connect" (this may vary slightly depending on the Neon Console's version).
 
-![Neon Connection Details](images/Click_Dashboard.png)
+![Neon Connection Details](/images/Click_Dashboard.png)
 
 - In the Connection Details section, you will see the connection string displayed. Your connection string will be customized with your Neon credentials. Copy the connections string based on the frameworks you are using.
 -  View or Generate a Password 

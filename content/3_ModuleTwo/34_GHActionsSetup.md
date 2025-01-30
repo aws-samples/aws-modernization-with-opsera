@@ -15,7 +15,7 @@ In this section, we'll create the GitHub Actions workflow that syncs your RDS da
    - Click "New workflow"
    - Choose "set up a workflow yourself"
 
-![Create Workflow](images/create-workflow.png)
+![Create Workflow](/images/create-workflow.png)
 
 2. Name your file `sync.yml` and paste the following content:
 
@@ -170,7 +170,7 @@ jobs:
          pkill -f "ssm start-session"
 ```
 
-![Edit Workflow](images/edit-workflow.png)
+![Edit Workflow](/images/edit-workflow.png)
 
 3. Click "Commit changes" to save the workflow
 
@@ -182,7 +182,7 @@ When you first commit the workflow file:
 2. You'll see "Create Neon Twin" workflow starting automatically
 3. Click on the running workflow to see detailed progress
 
-![Initial Run](images/initial-run.png)
+![Initial Run](/images/initial-run.png)
 
 ### Understanding the Workflow Steps
 You can monitor these key stages:
@@ -207,7 +207,7 @@ To run the sync manually:
 3. Select "Run workflow"
 4. Click the green "Run workflow" button
 
-![Manual Run](images/manual-run.png)
+![Manual Run](/images/manual-run.png)
 
 ### 🔍 Troubleshooting
 If you see issues:

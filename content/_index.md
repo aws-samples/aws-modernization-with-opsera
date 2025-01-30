@@ -6,7 +6,7 @@ weight = 1
 
 # Intro
 
-![Neon Logo](images/neon-logo.png)
+![Neon Logo](/images/neon-logo.png)
 
 ### Welcome!
 

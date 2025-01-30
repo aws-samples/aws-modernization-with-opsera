@@ -10,7 +10,7 @@ weight = 11
 Neon is revolutionizing the database industry by providing a serverless Postgres platform designed to help teams ship reliable and scalable applications faster. Our mission is to make database management effortless, allowing developers to focus on building great applications.
 
 ## Our Technology
-![Neon Technology](images/neontech.jpg)
+![Neon Technology](/images/neontech.jpg)
 
 Neon's innovative technology stack includes:
 

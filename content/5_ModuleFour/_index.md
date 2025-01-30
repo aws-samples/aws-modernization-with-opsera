@@ -8,11 +8,24 @@ weight = 40
 
 Congratulations on completing the **Neon Twin Deploy Workshop**! Before wrapping up, it’s important to clean up any resources that were created during the workshop to ensure you’re not incurring unnecessary costs or leaving active resources behind in your AWS account.
 
-+++
-title = "Clean Up"
-chapter = true
-weight = 40
-+++
+---
+
+## 🛠️ Resources to Clean Up
+
+During this workshop, you created the following resources, which need to be cleaned up:
+
+1. **GitHub Repository**
+   - Contains your workflows and scripts for Neon Twin synchronization.
+2. **CloudFormation Stack**
+   - Deployed resources for OIDC authentication between GitHub and AWS.
+3. **Neon Database Instance**
+   - Created for your development environment.
+4. **RDS Snapshot/Dump File**
+   - Used to restore your RDS database to Neon (if stored in S3).
+5. **Secrets in GitHub**
+   - Sensitive data stored in GitHub Secrets, including database connection strings and AWS region details.
+
+---
 
 ## 📋 Step-by-Step Clean Up Instructions
 
@@ -25,11 +38,18 @@ weight = 40
 
 > **Tip**: Check the "Events" tab in CloudFormation for progress updates during deletion.
 
-+++
-title = "Clean Up"
-chapter = true
-weight = 40
-+++
+---
+
+### 2️⃣ **Remove GitHub Secrets**
+
+1. Go to your GitHub repository and click on **Settings**.
+2. Navigate to **Secrets and variables** → **Actions**.
+3. For each secret you created (e.g., `PROD_DATABASE_URL`, `DEV_DATABASE_URL`, `AWS_REGION`, `AWS_ACCOUNT_ROLE`):
+   - Click the delete icon to remove the secret.
+
+> **Important**: Ensure no workflows are using these secrets before deletion.
+
+---
 
 ### 3️⃣ **Delete the GitHub Repository**
 
@@ -39,11 +59,17 @@ weight = 40
 
 > **Note**: Ensure you’ve saved any files or workflows you’d like to keep before deletion.
 
-+++
-title = "Clean Up"
-chapter = true
-weight = 40
-+++
+---
+
+### 4️⃣ **Delete the Neon Database**
+
+1. Log in to the [Neon Console](https://console.neon.tech).
+2. Locate your Neon database instance.
+3. Click on the database and choose **Delete**.
+
+> **Caution**: Ensure no critical data exists in this database before deletion.
+
+---
 
 ### 5️⃣ **Remove RDS Snapshots or Dump Files**
 
@@ -62,11 +88,16 @@ If you created an RDS snapshot or stored a database dump file in S3, follow thes
 
 > **Reminder**: Double-check the bucket for any leftover workshop-related files.
 
-+++
-title = "Clean Up"
-chapter = true
-weight = 40
-+++
+---
+
+### 6️⃣ **Verify Cleanup**
+
+- Ensure no active **CloudFormation stacks** remain.
+- Confirm all **Neon databases** are deleted.
+- Check your **GitHub repositories** and **secrets** for any leftovers.
+- Verify that your **AWS account** has no lingering RDS snapshots, S3 files, or associated costs.
+
+---
 
 ## 🎯 Summary
 
