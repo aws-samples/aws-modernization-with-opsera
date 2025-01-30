@@ -1,0 +1,148 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS CloudFormation Template for GitHub Actions OIDC Authentication with specific RDS permissions.
+
+Parameters:
+  Owners:
+    Type: CommaDelimitedList
+    Default: "change-me-to-your-github-username!"
+    Description: >
+      A comma-separated list of GitHub organizations or users. Example: 'mygithubusername,another-org'.
+
+  RepositoriesPerOwner:
+    Type: String
+    Default: "change-me-to-your-github-repo"
+    Description: >
+      Pipe-separated repository lists corresponding to each owner in the 'Owners' parameter. Use '*' for all repositories.
+
+Resources:
+  # GitHub OIDC Provider
+  GitHubActionsOidcProvider:
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+      ThumbprintList:
+        - '6938fd4d98bab03faadb97b34396831e3780aea1'  # GitHub OIDC Thumbprint
+
+  # Custom Resource to Process Repository Access
+  RepoListProcessor:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          import cfnresponse
+          def handler(event, context):
+              try:
+                  if event['RequestType'] in ['Create', 'Update']:
+                      owners = event['ResourceProperties']['Owners'].split(',')
+                      repos_per_owner = event['ResourceProperties']['RepositoriesPerOwner'].split('|')
+                      if len(owners) != len(repos_per_owner):
+                          raise ValueError("Mismatch between owners and repositories.")
+                      repo_list = []
+                      for owner, repos in zip(owners, repos_per_owner):
+                          if repos == '*':
+                              repo_list.append(f"repo:{owner}/*")
+                          else:
+                              for repo in repos.split(','):
+                                  repo_list.append(f"repo:{owner}/{repo}:*")
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {'RepoList': ','.join(repo_list)})
+                  else:
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+              except Exception as e:
+                  print(f"Error: {e}")
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {'Error': str(e)})
+      Runtime: python3.9
+      Timeout: 30
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  RepoListCustomResource:
+    Type: Custom::RepoList
+    Properties:
+      ServiceToken: !GetAtt RepoListProcessor.Arn
+      Owners: !Join [ ",", !Ref Owners ]
+      RepositoriesPerOwner: !Ref RepositoriesPerOwner
+
+  # IAM Role for GitHub Actions
+  GitHubActionsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "GitHub_Actions_Role_${AWS::StackName}"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Sub "arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com"
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+              StringLike:
+                "token.actions.githubusercontent.com:sub": !Split [ ",", !GetAtt RepoListCustomResource.RepoList ]
+
+      Policies:
+        - PolicyName: RDSAccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: DescribeRDS
+                Effect: Allow
+                Action:
+                  - rds:DescribeDBInstances
+                  - rds:ListTagsForResource
+                Resource:
+                  - !Sub "arn:aws:rds:${AWS::Region}:${AWS::AccountId}:db:neon-*"
+      
+              - Sid: SSMParameterAccess
+                Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                Resource:
+                  - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/rds/db-username"
+                  - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/rds/db-password"
+                  - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/rds/connection-string"
+      
+              - Sid: EC2Read
+                Effect: Allow
+                Action:
+                  - ec2:DescribeInstances
+                Resource: "*"
+      
+              - Sid: SSMSessionStart
+                Effect: Allow
+                Action:
+                  - ssm:StartSession
+                Resource: 
+                  - !Sub "arn:aws:ssm:${AWS::Region}:*:document/AWS-StartPortForwardingSessionToRemoteHost"
+                  - !Sub "arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/*"
+      
+              - Sid: SSMSessionManagement
+                Effect: Allow
+                Action:
+                  - ssm:TerminateSession
+                  - ssm:ResumeSession
+                Resource:
+                  - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:session/*"
+
+
+Outputs:
+  GitHubActionsRoleArn:
+    Description: ARN of the GitHub Actions IAM Role
+    Value: !GetAtt GitHubActionsRole.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-GitHubActionsRoleArn"

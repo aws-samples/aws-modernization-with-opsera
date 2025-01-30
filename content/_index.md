@@ -1,24 +1,35 @@
----
-title: "AWS Modernization Workshop Base Template" # MODIFY THIS TO BE THE TITLE OF YOUR WORKSHOP
-chapter: true
-weight: 1
----
++++
+title = "Introduction"
+chapter = true
+weight = 1
++++
 
-# AWS Modernization Workshop Base Template <!-- CHANGE THIS TO BE THE TITLE OF YOUR WORKSHOP -->
-<br>
-![Partner Logo](/images/AWS_Logo.png)  <!-- ADD YOUR PARTNER LOGO HERE USING THE INSTRUCTIONS BELOW -->
-<br>
+# Intro
 
-## Welcome
+![Neon Logo](images/neon-logo.png)
 
-**REMOVE:** By utilizing this template, you can create your workshops with little coding knowledge. These workshops use the Hugo Framework and the hugo-theme-learn submodules. By writing content using simple markdown code, Hugo creates the necessary HTML for you. Examples of code, files, and folders here can be modified, copied, pasted, and deleted as necessary. Block sections of instruction that should be removed will be explicitly marked with **REMOVE**. Other sections should be modified to reflect the workshop. For guidance on how to utilize the Hugo framework and markdown, please refer to the module titled "Hugo Framework And Markdown". That module can be removed once building the workshop is complete.
+### Welcome!
 
-This paragraph block can give the high level overview of the learning goals and use cases of what the workshop is trying to teach.
+In this workshop, you will learn how to enhance your development workflow by integrating Neon alongside your existing Amazon RDS Postgres setup. We will explore how to leverage Neon's serverless PostgreSQL solution and database branching capabilities to optimize your development and testing processes while maintaining your production infrastructure on RDS.
 
-This paragraph block can be used to introduce the company and how the solution being taught addresses specific issues.
+RDS provides a robust and reliable foundation for production environments. By combining it with Neon's innovative features, you can create a more efficient and flexible development pipeline.
 
-**REMOVE:** Every introduction page should include the following warning label.
+### Learning Objectives
+- Implement Neon as a complementary development environment to RDS
+- Streamline data synchronization between RDS and Neon using pg_dump and GitHub Actions
+- Efficiently manage changes across both environments
+- Accelerate iteration cycles and enhance team collaboration
+- Optimize resource utilization in development while maintaining consistency with production
 
-{{% notice warning %}}
-The examples and sample code provided in this workshop are intended to be consumed as instructional content. These will help you understand how various AWS services can be architected to build a solution while demonstrating best practices along the way. These examples are not intended for use in production environments.
-{{% /notice %}}
+## Who should take this workshop?
+- Developers
+- Database Administrators
+- DevOps Engineers
+- Solutions Architects
+- Anyone interested in optimizing their PostgreSQL development workflow
+
+## Cost
+This workshop will incur costs associated with using Amazon RDS and Neon. It's important to be aware that once the lab is completed, we highly advise following the instructions to delete any resources to avoid additional costs. [Click here](../5_ModuleFour) to navigate to the Clean-Up instructions.
+
+## Duration
+The workshop is divided into several sections. Plan on 2-3 hours for completion of the entire workshop.
