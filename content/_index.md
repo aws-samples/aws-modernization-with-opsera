@@ -8,7 +8,7 @@ weight = 1
 
 ![Neon Logo](/images/neon-logo.png)
 
-### Welcome!
+### Welcome!!
 
 In this workshop, you will learn how to enhance your development workflow by integrating Neon alongside your existing Amazon RDS Postgres setup. We will explore how to leverage Neon's serverless PostgreSQL solution and database branching capabilities to optimize your development and testing processes while maintaining your production infrastructure on RDS.
 
