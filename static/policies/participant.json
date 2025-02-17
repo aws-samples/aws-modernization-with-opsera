@@ -16,6 +16,7 @@
             "bedrock:*",
             "lambda:*",
             "s3:*",
+            "rds:*",
             "aws-marketplace:*"
         ],
         "Resource": "*"

@@ -1,10 +1,4 @@
 Parameters:
-  HuggingFaceSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Name: HuggingFaceToken
-      Description: "Hugging Face API Token for ChatQnA Guardrails"
-      SecretString: '{"HUGGINGFACEHUB_API_TOKEN":"aGZfQ2VFbWhxcklHYnF2emFpd01Fa3F2YmRLcGhIWm1OQXZ1RQ=="}'
   RepoUrl:
     Type: String
     Description: The URL of the repo that the CodeBuild project will clone.
@@ -107,10 +101,6 @@ Resources:
                   - :report-group/
                   - Ref: InstallWorkshopStack
                   - -*
-          - Action:
-              - secretsmanager:GetSecretValue
-            Effect: Allow
-            Resource: !Ref HuggingFaceSecret  
         Version: "2012-10-17"
       PolicyName: WSCodeBuildServiceRoleDefaultPolicy
       Roles:
@@ -188,9 +178,6 @@ Resources:
             Type: PLAINTEXT
             Value:
               Ref: Ec2SshKeyPair
-          - Name: HUGGING_FACE_TOKEN
-            Type: SECRETS_MANAGER
-            Value: HuggingFaceToken:HUGGINGFACEHUB_API_TOKEN
         Image: aws/codebuild/standard:7.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -219,7 +206,6 @@ Resources:
                   "export OPEA_ROLE_ARN=$PARTICIPANT_ROLE_ARN",
                   "export OPEA_ROLE_NAME=WSOpsRole",
                   "export OPEA_USER=WSControlPlaneUser",
-                  "export HUGGINGFACEHUB_API_TOKEN=$(aws secretsmanager get-secret-value --secret-id HuggingFaceToken --query SecretString --output text | jq -r .HUGGINGFACEHUB_API_TOKEN | base64 -d)",
                   "chmod +x ./lib/app/bin/start.sh",
                   "./lib/app/bin/start.sh $EVENT_REQUEST_TYPE"
                 ]

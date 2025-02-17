@@ -31,3 +31,6 @@ weight = 0
 ```
 
 The title will be the title on navigation panel on the left. The weight determines the order the page appears in the navigation panel.
+
+
+https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://ws-assets-prod-iad-r-iad-ed304a55c2ca1aee.s3.us-east-1.amazonaws.com/50cf2fdb-1972-4e79-814f-12d2e6fb0dab/LaunchStack.yml&stackName=LaunchStack
