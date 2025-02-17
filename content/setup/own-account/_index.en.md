@@ -40,13 +40,10 @@ The stack sets up the following components:
         If the name does not contain a forward-slash, copy the whole name. If it contains a forward slash, just take the part before the slash. For example, if it says "USER" you would input "USER", but if it says "ADMIN-ROLE/USER", you would just input "ADMIN-ROLE". 
     
         Or run the following command to get your arn
-
-:::code{showCopyAction=true}
+```
 aws sts get-caller-identity --query 'Arn' --output text | awk -F: '{print $NF}' | (read id; if [[ $id == *"user"* ]]; then aws sts get-caller-identity --query 'Arn' --output text; else role=$(echo $id | cut -d'/' -f2); aws iam get-role --role-name $role --query 'Role.Arn' --output text; fi)
-:::
-
-
-    **ONLY FOR MODULE 4: In case you will be deploying Remote Inference**
+```
+**ONLY FOR MODULE 4: In case you will be deploying Remote Inference**
 
     - *RemoteInferenceClientId* ,*RemoteInferenceClientSecret* & *RemoteInferenceURL*: Enter your provided credentials and URL to enable Remote Inference LLM on Denver Datanetworks, leveraging Intel Gaudi 2 for optimized performance.
 
@@ -78,18 +75,13 @@ You will interact with your EKS cluster using `kubectl`, you need to configure y
 
 2. Update Your kubeconfig
 Run the following command to update your kubeconfig with your cluster information (update your region if you selected a different region):
-
-
 ```bash
 aws eks update-kubeconfig --name :param{key=clusterName} --region us-east-1
 ```
-
 You should receive an output confirming your conf file was updated:
-
 ```
 Updated context arn:aws:eks:us-east-2:<<Account_ID>>:cluster/opea-eks-cluster in /home/cloudshell-user/.kube/config
 ```
-
 You are now ready to interact with the Kubernetes cluster using `kubectl`
 
 # Step 3: Verify you can access your EKS cluster:
@@ -115,14 +107,11 @@ After updating your kubeconfig, check if you can successfully connect to the clu
 
 
 4. Test it to see if you can see the nodes associated with the cluster:
-
 ```bash
 kubectl get nodes
 ```
-
 If the command is successful, you should see an output similar to this: 
 **NOTE** : Wait until you see the node to continue. If you don't see it, it means that the node is stil being provisioned.
-
 ```
 NAME                            STATUS   ROLES    AGE    VERSION
 ip-XXX-XXX-XXX-XXX.ec2.internal   Ready    <none>   146m   v1.27.16-eks-XXXXX

@@ -22,11 +22,9 @@ In the UI you can see the chatbot to interact with it
 ![ChatQnA_UI](/images/chatqna_ui.png)
 
 4. Check if the model is able to give us an answer about OPEA:
-
-:::code{showCopyAction=true}
+```
 What is OPEA?
-:::
-
+```
 ![Alt text](/images/Bedrock_bad.png)
 
 Notice that the initial answer provided by the chatbot is outdated or lacks specific information about OPEA. This is because OPEA is a relatively new project and wasn’t part of the dataset used to train the language model. Since most language models are static—they rely on data available at the time of training—they can’t automatically incorporate recent developments or information about new projects like OPEA.

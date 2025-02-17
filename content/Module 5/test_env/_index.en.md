@@ -14,10 +14,9 @@ In the UI you can see the chatbot interact with it
 
 To verify the UI, go ahead and ask
 
-    :::code{showCopyAction=true}
-    What is Denvr? Provide short answer?
-    :::
-
+    ```
+What is Denvr? Provide short answer?
+```
 ![Alt text](/images/question1.png)
     
 Notice that the initial answer provided by the chatbot is outdated or generic or lacks specific information about Denvr Cloud. This is because Denvr Cloud wasn’t part of the dataset used to train the language model. Since most language models are static—they rely on data available at the time of training.

@@ -14,11 +14,9 @@ Since you already set up your access to your Kubernetes clustes from "Getting Se
 ### Step 1: Examine Cluster Resources
 
 1. Go to your CloudShell and deploy the ChatQnA ClourFormation template into your EKS Cluster
-
 ```bash
 aws cloudformation execute-change-set --change-set-name default-change-set --stack-name OpeaChatQnAStack
 ```
-
 ### Step 2: Examine Cluster Resources
 
 Click on the assigned cluster name to explore the deployment. Each EKS cluster includes essential configurations, such as the Kubernetes version, networking setup, and logging options. Review these settings in the console to gain insight into the foundation of your application environment. Understanding these details will help in managing cluster operations and troubleshooting if needed.
@@ -33,14 +31,12 @@ This section in the console displays all the applications currently running with
 ![OPEA Microservices](/images/services.png)
 
 3. Get pod names (default namespace)
-
 ```bash
 kubectl get pods
 ``` 
 
 
 The output has to display all the pods "Running" (1/1)
-
 ```
 NAME                                       READY   STATUS    RESTARTS   AGE
 chatqna-65f6766db7-nlrr5                   1/1     Running   0          119s
@@ -53,5 +49,4 @@ chatqna-tei-7f948c9bdd-8qdth               1/1     Running   0          119s
 chatqna-teirerank-6c9cd6c546-lk2qk         1/1     Running   0          119s
 chatqna-tgi-785cff64c4-k266l               1/1     Running   0          119s
 ```
-
 This confirms that your application was succesfully deployed, and you’re now ready to explore your application deployment and manage resources within the cluster.
