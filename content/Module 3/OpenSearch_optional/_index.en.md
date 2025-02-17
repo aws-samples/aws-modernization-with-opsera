@@ -9,13 +9,13 @@ OpenSearch provides a wealth of features for searching your data. In this sectio
 
 When you use OpenSearch, you can apply a schema, called the `mapping` to your index. The mapping determines how OpenSearch analyzes and enables the fields in your JSON documents for retrieval. OpenSearch has automatic schema detection for quick starts, but for most situations, it's best to set the schema directly. You do this when you create the index. Of coourse, OPEA and the OpenSearch microservice have set the mapping for you, but you can retrieve it for the embeddings index with the below command.
 
-```
+```bash
 curl -XGET https://localhost:9200/rag-opensearch/_mapping --insecure -u admin:strongOpea0! | jq .
 ```
 
 You should see a response like this:
 
-```
+```JSON
 {
     "rag-opensearch": {
         "mappings": {
@@ -56,7 +56,7 @@ OpenSearch is a lexical search engine in addition to being a vector search engin
 
 Execute the following command to run the query
 
-```
+```bash
 curl -XGET https://localhost:9200/rag-opensearch/_search \
   --insecure -u "admin:strongOpea0!" \
   -H "Content-type: application/json" \
@@ -135,7 +135,7 @@ Try running the query as an exact k-Nearest-Neighbor query. First, you'll need t
 
 In order to run the command, you'll need the port you used to forward to the tei microservice above. You can use the `ps aux | grep kubectl` command-line command to see which processes are running and what ports they are mapping. If you have followed along with the guide, you should have the `chatqna-tei` microservice running on port 9800.
 
-```
+```bash
 embedding=$(curl -X POST localhost:9800/embed \
     -d '{"inputs":"What was the Nike revenue in 2023?"}' \
     -H 'Content-Type: application/json')
@@ -144,7 +144,7 @@ embedding=`echo $embedding | jq '.[0]'`
 
 You can use `echo $embedding` to see the generated embedding. Now you'll create the local file `query.json` with the embeding merged into the query, and then run an exact k-Nearest-Neighbors (k-NN) query to compare the query embeddingg to every document (chunk) in the index and retrieve the closest matches.
 
-```
+```bash
 echo "{ \
     \"size\": 2, \
     \"_source\": \"text\", \
@@ -207,7 +207,7 @@ This is the correct response. Notice that the first result contains the text "NI
 
 Exact k-NN is great when you have relatively few documents. However as your document set grows, latency will grow along with it and beyond a few 100s of 1000s of documents, will be too slow. Instead, you can use approximate nearest neighbor search. The below command uses HNSW to find the nearest neighbors. 
 
-```
+```bash
 echo "{ \
   \"size\": 2, \
   \"_source\": \"text\", \
@@ -231,7 +231,7 @@ Again, you can see the correct document is the first result retrieved. Using app
 
 [OpenSearch supports hybrid search](https://opensearch.org/docs/latest/search-plugins/hybrid-search/) -- where you specify both a lexical and vector query, along with a normalization and merge strategy. OpenSearch runs both queries normalizes and merges the results. When you perform hybrid search, you set a [Search Pipeline](https://opensearch.org/docs/latest/search-plugins/search-pipelines/index/), and send queries through that pipeline. Use the below command to use OpenSearch's REST API to set a search pipeline.
 
-```
+```bash
 curl -XPUT https://localhost:9200/_search/pipeline/nlp-search-pipeline \
   --insecure -u "admin:strongOpea0!" \
   -H "Content-type: application/json" \
@@ -256,7 +256,7 @@ This pipeline uses [min/max normalization](https://en.wikipedia.org/wiki/Normali
 
 To use the pipeline, you send a query to the pipeline API. Use the below command to create the query in the file `hybrid_query.json`.
 
-```
+```bash
 echo "{ \
   \"_source\": { \"excludes\": \"vector_field\"}, \
   \"size\": 4, \

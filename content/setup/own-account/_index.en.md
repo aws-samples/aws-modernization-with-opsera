@@ -41,9 +41,9 @@ The stack sets up the following components:
     
         Or run the following command to get your arn
 
-```
+:::code{showCopyAction=true}
 aws sts get-caller-identity --query 'Arn' --output text | awk -F: '{print $NF}' | (read id; if [[ $id == *"user"* ]]; then aws sts get-caller-identity --query 'Arn' --output text; else role=$(echo $id | cut -d'/' -f2); aws iam get-role --role-name $role --query 'Role.Arn' --output text; fi)
-```
+:::
 
 
     **ONLY FOR MODULE 4: In case you will be deploying Remote Inference**
@@ -80,9 +80,7 @@ You will interact with your EKS cluster using `kubectl`, you need to configure y
 Run the following command to update your kubeconfig with your cluster information (update your region if you selected a different region):
 
 
-```bash
-aws eks update-kubeconfig --name :param{key=clusterName} --region us-east-1
-```
+::code[aws eks update-kubeconfig --name :param{key=clusterName} --region us-east-1]{showCopyAction=true language=bash}
 
 You should receive an output confirming your conf file was updated:
 
@@ -116,9 +114,7 @@ After updating your kubeconfig, check if you can successfully connect to the clu
 
 4. Test it to see if you can see the nodes associated with the cluster:
 
-```bash
-kubectl get nodes
-```
+::code[kubectl get nodes]{showCopyAction=true language=bash}
 
 If the command is successful, you should see an output similar to this: 
 **NOTE** : Wait until you see the node to continue. If you don't see it, it means that the node is stil being provisioned.

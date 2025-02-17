@@ -34,9 +34,7 @@ You will interact with your EKS cluster using `kubectl`, you need to configure y
 Run the following command to update your kubeconfig with your cluster information:
 
 
-```bash
-aws eks update-kubeconfig --name :param{key=clusterName} --region us-east-1
-```
+::code[aws eks update-kubeconfig --name :param{key=clusterName} --region us-east-1]{showCopyAction=true language=bash}
 
 You should receive an output confirming your conf file was updated:
 
@@ -50,9 +48,7 @@ You are now ready to interact with the Kubernetes cluster using `kubectl`
 After updating your kubeconfig, check if you can successfully connect to the cluster. A simple test is to see if you can see the nodes associated with the cluster:
 
 
-```bash
-kubectl get nodes
-```
+::code[kubectl get nodes]{showCopyAction=true language=bash}
 
 
 If the command is successful, you should see an output similar to this:
