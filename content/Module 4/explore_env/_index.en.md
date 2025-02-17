@@ -19,10 +19,12 @@ In this deployment when you access the UI the message is sent to the backend bed
 {{% /notice %}}
 
 ### Deploying ChatQnA Using Amazon Bedrock LLMs
-For this lab, we've created a changeset with the full parallel deployment of the ChatQnA example in the same Kubernetes cluster you've been using. The following command will deploy pods to the cluster within the "bedrock" namespace that are identical to the original ChatQnA pods, except with Bedrock models instead of TGI.
-```bash
+For this lab, we've created a changeset with the full parallel deployment of the ChatQnA example in the same Kubernetes cluster you've been using. The following command will deploy pods to the cluster within the "bedrock" namespace that are identical to the original ChatQnA pods, except with Bedrock models instead of TGI. 
+
+```
 aws cloudformation execute-change-set --change-set-name bedrock-change-set --stack-name OpeaBedrockStack
 ```
+
 ### Activating the Model
 This module works with just about any text-generation LLM supported by Bedrock, but for the purposes of this lab we've used the *Anthropic Claude Haiku 3* model. So while you're waiting for the change set to deploy, let's go activate our model in the Bedrock console:
 
@@ -58,7 +60,8 @@ kubectl get pods -n bedrock
 :::
 
 ...to get output like this:
-```bash
+
+```
 NAME                                                READY   STATUS    RESTARTS   AGE
 chatqna-bedrock-deployment-5b697d758-7gsdr           1/1     Running   0          28s
 chatqna-chatqna-ui-deployment-7fc549b9b5-jhntn       1/1     Running   0          28s
@@ -70,6 +73,7 @@ chatqna-retriever-usvc-deployment-55f5676745-5d5cj   0/1     Running   0        
 chatqna-tei-deployment-85d9484bf7-2l7jr              1/1     Running   0          28s
 chatqna-teirerank-deployment-589dd896d9-xjvmp        1/1     Running   0          28s
 ```
+
 {{% notice note %}}It can take several minutes for Bedrock to fully initialize and be available. Only continue when you see the `chatqna-bedrock-deployment` pod in the `Running` state.
 {{% /notice %}}
 

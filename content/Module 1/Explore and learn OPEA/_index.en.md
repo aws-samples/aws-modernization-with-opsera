@@ -27,11 +27,14 @@ Before start exploring, consider that only the **gateway** and **UI** services a
 `kubectl get svc` lists all services in a Kubernetes cluster, showing their names, types, cluster IPs, and exposed ports. It provides an overview of how applications are exposed for internal or external access. 
 
 Run the following command on your CloudShell:
-```bash
+
+```
 kubectl get svc
 ```
+
 You will see output similar to this:
-```bash 
+
+```
 NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)             AGE
 chatqna                   ClusterIP   XXX.XXX.XXX       <none>        8888/TCP            12h
 chatqna-chatqna-ui        ClusterIP   XXX.XXX.XXX       <none>        5173/TCP            12h
@@ -44,6 +47,7 @@ chatqna-teirerank         ClusterIP   XXX.XXX.XXX       <none>        80/TCP    
 chatqna-tgi               ClusterIP   XXX.XXX.XXX       <none>        80/TCP              12h
 kubernetes                ClusterIP   XXX.XXX.XXX       <none>        443/TCP             15h
 ```
+
 The command `kubectl get svc` is used to view the services in a Kubernetes cluster, which are like entry points for accessing your applications. Each service has a name (such as chatqna or chatqna-ui) that identifies it. Services can be exposed in different ways: for example, a ClusterIP service is only accessible within the cluster, while a NodePort service is accessible externally through a specific port on the node. The Cluster-IP is the internal address used by other parts of the system to reach the service. If the service were available from outside the cluster, you would see an External-IP, but in this case, it’s <none> because these services are internal. The Ports column shows which network ports the service listens on, like 8888/TCP for chatqna or 80:30144/TCP for chatqna-nginx, indicating how traffic is directed to the service. Finally, the Age tells you how long the service has been running, which in this example is 12 hours for all listed services.
 
 Now, let’s explore the architecture.
@@ -66,11 +70,13 @@ This service isn't directly exposed, but you can access it directly from the Loa
 ![dns_Load_balancer](/images/dns_load_balancer.png)
 
 You will use curl to send a request to an API endpoint to test the functionality of each microservice separately. The purpose is to ask a question, such as **"What was the revenue of Nike in 2023?"**, and verify that the API responds correctly. This helps ensure that all services are working as expected.
-```bash
+
+```
 curl http://<**Chatqna-ingress Load Balancer DNS**>/v1/chatqna     
     -H "Content-Type: application/json"     
     -d '{"messages": "What was the revenue of Nike in 2023?"}'
 ```
+
 You should receive an answer back, verifying that all the services in the RAG flow are working.
 
 You will see that the model couldn’t answer the question because it lacks the necessary context and operates on ***outdated information***. Without up-to-date or relevant data, it’s unable to provide accurate responses. You'll fix this in few minutes by using RAG to allow the model to pull in current, contextually relevant information, ensuring more precise and relevant answers.
@@ -117,22 +123,28 @@ In this case, ChatQnA uses [Hugging Face TEI](https://huggingface.co/docs/text-e
 To explore the microservices that are not exposed, you will use the nginx pod to contact them via curl. To do that, the microservice will be accessed using each microservice's internal DNS name. Above, you used the command `kubectl get svc` to list out all of the services;  these are the services you will interact with.
 
 1. Access to ngnix POD (copy your NGNIX entire pod name from `kubectl get pods` and REPLACE ***chatqna-nginx-xxxxxxxx*** on the below command)
+
 ```bash
 kubectl exec -it <*POD name:chatqna-nginx-xxxxxxxx*> -- /bin/bash
 ```
+
 Your command prompt should now indicate that you are inside the container, reflecting the change in environment:
+
 ```
-root@chatqna-nginx-deployment-xxxxxxxxxxxx:/#
+root@chatqna-nginx-deployment-xxxxxxxxxxxx:/# 
 ```
+
 Once inside, you will now have direct access to the internal pods. 
 
 2. Get the embedding from the Embeddings Microservice for the phrase *"What was Deep Learning?"*:
-```bash
+
+```
 curl chatqna-tei:80/embed \
     -X POST \
     -d '{"inputs":"What was Deep Learning?"}' \
     -H 'Content-Type: application/json'
 ```
+
 The answer will be the vector representation of the phrase "What was Deep Learning?". This service returns the vector embedding for the `inputs` from the REST API.
 
 ![embeddings](/images/embeddings.png)
@@ -158,32 +170,39 @@ To test it and help the model answer the initial question **What was Nike revenu
 Execute the following command to download a sample [Nike revenue report](https://github.com/opea-project/GenAIComps/blob/main/comps/retrievers/redis/data/nke-10k-2023.pdf) to the nginx pod (if you are no longer logged in to the NGinx pod, be sure to use the above command to log in again):
 
 1.  Download the document to the microservice :
-```bash
+```
 curl -C - -O https://raw.githubusercontent.com/opea-project/GenAIComps/main/comps/third_parties/pathway/src/data/nke-10k-2023.pdf
 ```
+
 2.  Feed the knowledge base (Vectord) with the document (It will take ~30 seconds):
-```bash
+```
 curl -X POST "chatqna-data-prep:6007/v1/dataprep" \
      -H "Content-Type: multipart/form-data" \
      -F "files=@./nke-10k-2023.pdf"
 ```
+
 After running the previous command, you should receive a confirmation message like the one below. This command updated the knowledge base by uploading a local file for processing.
-```json
+
+```
 {
         "status": 200,
         "message": "Data preparation succeeded"
     }
 ```
+
 The data preparation microservice API can retrieve information about the list of files stored in the vector database.
 
 3. Verify if the document was uploaded:
-```bash
+
+```
 curl -X POST "chatqna-data-prep:6007/v1/dataprep/get_file" \
      -H "Content-Type: application/json"
 ```
-After running the previous command, you should receive the confirmation message.
-```json 
-    {
+
+After running the previous command, you should receive the confirmation message. 
+
+```
+{
         "name": "nke-10k-2023.pdf",
         "id": "nke-10k-2023.pdf",
         "type": 
@@ -191,6 +210,7 @@ After running the previous command, you should receive the confirmation message.
         "parent": ""
     }
 ```
+
 Congratulations! You've successfully prepared your knowledge base. Now you'll explore the microservices involved in prompt handling.
 
 # Step 3: Prompting
@@ -218,36 +238,45 @@ Of course, you need to have a vector embedding for the retrieval query. You can 
 To create the embedding, use the `chatqna-tei` microservice (again, make sure you are logged in to the NGinx pod).
 
 1. Create the embedding and save locally (embed_question):
-```bash
+
+```
 embed_question=$(curl chatqna-tei:80/embed \
     -X POST \
     -d '{"inputs":"What was the Nike revenue in 2023?"}' \
     -H 'Content-Type: application/json')
 ```
+
 You should get the details about the writing task:
+
 ```
 % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
 100  9571  100  9524  100    47  1097k   5543 --:--:-- --:--:-- --:--:-- 1168k
 ```
-2. Check to see if your embedding was saved:
+
+2. Check to see if your embedding was saved: 
 ```bash
 echo $embed_question
 ```
+
 You should be able to see the vectors the embeddings microservice generated. 
 You are now able to use the retriever microservice to get the most similar information from your knowledge base. 
 
 3. Get and save similar vectors from the initial `embed_question` locally `similar_docs`:
-```bash
+
+```
 similar_docs=$(curl chatqna-retriever-usvc:7000/v1/retrieval -X POST   -d "{\"text\":\"test\",\"embedding\":${embed_question}}"   -H 'Content-Type: application/json')
 ```
+
 By looking at the previous output, you can see the most similar passages (TOP_3) from the document [Nike revenue report](https://github.com/opea-project/GenAIComps/blob/main/comps/retrievers/redis/data/nke-10k-2023.pdf) and the question **"What was the Nike revenue in 2023?"**.
-```bash
+
+```
 echo $similar_docs
 ```
+
 {{% notice note %}}The following output has been formatted for better readability. Your results will be presented in plain text and may vary slightly due to the similarity search algorithm. However, you can double check that the retrieved documents will be relevant to your initial query.
 {{% /notice %}}
-```json 
+```
 {
     "id": "eb5a39b6f8b42b90fbf9ebc5f850ffd5",
     "retrieved_docs": [{
@@ -297,6 +326,7 @@ echo $similar_docs
         %\n16 % $\n42,293 \n5 %\n6 %\nConverse\n2,427 \n2,346 \n3 %\n8 %\n2,205 \n6 %\n7 %\nCorporate\n27"
     }
 ```
+
 The application will use that information as context for prompting the LLM, but there is still one more step that you need to do to refine and check the quality of those retrieved documents: the `reranker`.
 
 ### Reranker Microservice (POD:chatqna-teirerank:80)
@@ -312,23 +342,30 @@ The reranker will use `similar_docs` from the previous stage and compare it with
 Extract the 3 retrieved text snippets and save them in a new variable to be reranked:
 
 1. Install jq dependencies to format `similar_docs`
-```bash
+
+```
 echo -e "deb http://deb.debian.org/debian bookworm main contrib non-free\ndeb http://security.debian.org/debian-security bookworm-security main contrib non-free\ndeb http://deb.debian.org/debian bookworm-updates main contrib non-free" > /etc/apt/sources.list && apt update && apt install -y jq
 ```
+
 2. Extract and format the texts into a valid JSON array of strings
-```bash
+
+```
 texts=$(echo "$similar_docs" | jq -r '[.retrieved_docs[].text | @json]')
 ```
+
 3. Send the request to the microservice with the query and the formatted texts:
-```bash
+
+```
 curl -X POST chatqna-teirerank:80/rerank \
   -d "{\"query\":\"What was Nike Revenue in 2023?\", \"texts\": $texts}" \
   -H 'Content-Type: application/json'
 ```
+
 **Response**:
 {{% notice note %}}The following output has been formatted for better readability. Your results are displayed in plain text and **may vary slightly due to the similarity search algorithm**. The retrieved documents are ranked by similarity to your query, with the highest-ranked index representing the most relevant match. You can confirm that the top-ranked document corresponds to the one most closely aligned with your query.
 {{% /notice %}}
-```json
+
+```
 {
         "index": 2,
         "score": 0.9972289
@@ -346,11 +383,13 @@ curl -X POST chatqna-teirerank:80/rerank \
         "score": 0.84730965
     }
 ```
+
 The server responds with a JSON array containing objects with two fields: index and score. This indicates how the snippets are ranked based on their relevance to the query: `{"index":2,"score":0.9972289}` means the first text (index 0) has a high relevance score of approximately 0.7982.
 `{"index":0,"score":0.9776342},{"index":3,"score":0.9296986},{"index":1,"score":0.84730965}` indicates that the other snippets (index 3,1 and 2) have a much lower score. 
 
 As you can see from `similar_doc` the id=2 has the below information where it EXACTLY refers to the revenue for 2023!
-```json 
+
+```
 "text": "RESULTS OF OPERATIONS\n(Dollars in millions, except per share data)\nFISCAL 2023\nFISCAL 2022\n% CHANGE\nFISCAL 2021\n% CHANGE
         Revenues\n$51,217 \n$\n46,710 \n10 % $\n44,538 \n5 %\nCost of sales\n28,925 \n25,231 \n15 %\n24,576 \n3 %\nGross profit\n22,292 \n21,479 \n4 %
         19,962 \n8 %\nGross margin\n43.5 %\n46.0 %\n44.8 %\nDemand creation expense\n4,060 \n3,850 \n5 %\n3,114 \n24 %\nOperating overhead expense
@@ -364,6 +403,7 @@ As you can see from `similar_doc` the id=2 has the below information where it EX
         %\n1,382 \n18 %\n18 %\nGlobal Brand Divisions\n58 \n102 \n-43 %\n-43 %\n25 \n308 %\n302 %\nTotal NIKE Brand Revenues\n$\n48,763  $\n44,436 \n10 
         %\n16 % $\n42,293 \n5 %\n6 %\nConverse\n2,427 \n2,346 \n3 %\n8 %\n2,205 \n6 %\n7 %\nCorporate\n27"
 ```
+
 Just the first will be used to prompt the LLM.
 
 ### LLM microservice (POD:chatqna-tgi:80)
@@ -381,31 +421,37 @@ OPEA allows the integration of any option. In this example, we have used the TGI
 For test purposes, you can directly prompt the TGI(LLM) to see if the model can answer to the initial question `What was Nike revenue in 2023?`
 
 1. Directly prompt the TGI(LLM) Microservice:
-```bash
+```
 curl chatqna-tgi:80/generate \
   -X POST \
   -d '{"inputs":"What was Nike revenue in 2023?","parameters":{"max_new_tokens":200, "do_sample": true}}' \
   -H 'Content-Type: application/json'
 ```
+
 The model will give you the answer to the prompt like the following:
+
 ```
 "generated_text":" Nike revenue in 2023 has not been reported as it is still in the fourth quarter. The previous full financial year—which is 2022—brought in $48.9 billion in revenue for the American multinational sportswear company. They deal with the design, development, manufacturing, and worldwide marketing/sales of a diverse portfolio of products. From coming into being in 1964 as Blue Ribbon Sports, the firm was renamed Nike, Inc., in 1978. Jumpman logos (for example), include Michael Jordan, who is a former professional basketball player—are among the brands' numerous trademarked symbols, tied to the 'Swoosh' logo.\n\nNike revenues are clearly affected by the football World Cup. Consequently, for the 13 weeks ending January 29 in 2022, which were characterized by the football world cup
 ```
+
 This directly prompts the LLM without providing the context. We can see that the model actually gives the **wrong answer**. To check the overall RAG performance, we should test with the megaservice as we did at the beginning  of this task, which will involve the entire flow.
 
 2. Exit the ngnix POD:
 You may find "pending jobs", please ignore it and try again.
+
 ```
 root@chatqna-nginx-deployment-XXXXXXXXXXXX:/# exit
 ```
+
 Use the load balancer URL you saved above in the below command to send the question "What was Nike's revenue in 2023?" to the ChatQNA application.
 
-3. Run the curl to the load balancer again:
-```json
+3. Run the curl to the load balancer again: 
+```
 curl http://<**Chatqna-ingress Load Balancer DNS**>/v1/chatqna \
     -H "Content-Type: application/json" \
     -d '{"messages": "What was the revenue of Nike in 2023?"}'
 ```
+
 4. Check your results. You will notice the streaming response, which is normal behavior for the microservice as it streams the answer. A streaming response means the data is sent in smaller chunks as it becomes available rather than all at once. In the application, this response is received by the UI and converted into a readable format, allowing the user to view the data as it arrives in real time.
 
 :::code{showCopyAction=false language=bash}
@@ -517,6 +563,7 @@ data: b''
 
 data: b''
 ```
+
 In this section, you’ve gained insights into each component involved in a RAG application, including the megaservice, gateway, and individual microservices. By testing each microservice in the console, you’ve explored their functionalities and interactions within the overall architecture.
 
 This hands-on experience allows you to understand how each component contributes to the retrieval-augmented generation process. You’ve observed how the pre-prompting phase prepares the knowledge base by uploading and organizing relevant documents, while the prompting phase retrieves this information to generate accurate responses.

@@ -12,18 +12,22 @@ In the UI you can see the chatbot interact with it
 
 ![ChatQnA_UI](/images/chatqna_ui.png)
 
-To verify the UI, go ahead and ask
+To verify the UI, go ahead and ask 
+
 ```
 What was Nike's revenue in 2023?
 ```
+
 ![Nike revenue](/images/NIKE_REVENUE.png)
 
 The answer is **correct** again because we already indexed our knowledge base on the previous step.
 
 Let's try something different. Will the app be able to answer about OPEA:
+
 ```
 What is OPEA?
 ```
+
 ![opea_wrong](/images/opea_wrong2.png)
 
 Notice that the initial answer provided by the chatbot is outdated or lacks specific information about OPEA. This is because OPEA is a relatively new project and wasn’t part of the dataset used to train the language model. Since most language models are static—they rely on data available at the time of training—they can’t automatically incorporate recent developments or information about new projects like OPEA.

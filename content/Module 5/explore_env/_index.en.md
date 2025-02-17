@@ -34,16 +34,20 @@ For this lab, we've created a changeset with the full parallel deployment of the
     This will deploy Chat QnA with Meta-Llama -3.1-70B-instruct Inference API. These Inference API's are pre-deployed on Denvr Cloud with Intel Gaudi2 accelerator and OPEA LLM microservices.
 
 **Note** : REPLACE DenvrClientID & DenvrClientSecret for the values you previously got from Denvr.
+
 ```
 aws cloudformation execute-change-set --change-set-name remote-inference-change-set --stack-name OpeaRemoteInferenceStack
 ```
+
 {{% notice note %}}*The manifest for *ChatQnA-Remote Inference* can be found in the [ChatQnA GenAIExamples repository](https://github.com/opea-project/GenAIExamples/blob/main/ChatQnA/kubernetes/intel/cpu/xeon/manifest/chatqna-remote-inference.yaml), and the instructions for deploying it manually can be found [here](https://github.com/opea-project/GenAIExamples/tree/main/ChatQnA/kubernetes/intel#deploy-on-xeon-with-remote-llm-model). The instructions here use AWS CloudFormation templates created by the AWS Marketplace EKS package*.
 {{% /notice %}}
 
 2. Verify the new services are created
+
 ```
 kubectl get pods -n remote-inference
 ```
+
 ![namespace](/images/pods.png)
 
 3. Test the Chat QnA on the console
@@ -53,19 +57,21 @@ kubectl get pods -n remote-inference
     ```
 kubectl exec -it <*POD name:chatqna-nginx-xxxxxxxx*> --namespace=remote-inference -- /bin/bash
 ```
-Your command prompt should now indicate that you are inside the container, reflecting the change in environment:
+
+    Your command prompt should now indicate that you are inside the container, reflecting the change in environment:
 
     ```
 root@chatqna-nginx-deployment-xxxxxxxxxxxx:/#
-    :::
+```
 
     Get the "What is Deep Learning? Explain in 20 words"*:
 
-    ```json
-curl chatqna:8888/v1/chatqna -H 'Content-Type: application/json' -d '{"messages": "What is Deep Learning. Exaplain in 20 words?"}'
     ```
-:::code{showCopyAction=false}
-    data: b' \n'
+curl chatqna:8888/v1/chatqna -H 'Content-Type: application/json' -d '{"messages": "What is Deep Learning. Exaplain in 20 words?"}'
+```
+
+    ```
+data: b' \n'
 
     data: b'Deep'
 
@@ -107,8 +113,9 @@ curl chatqna:8888/v1/chatqna -H 'Content-Type: application/json' -d '{"messages"
 
     data: b''
 
-    data: data: [DONE]
+    data: [DONE]
 ```
+    
 4. Verify the deployment is done verifying the new load balancer on your managment console
 
     ![Alt tex](/images/lb_1_denvr.png)

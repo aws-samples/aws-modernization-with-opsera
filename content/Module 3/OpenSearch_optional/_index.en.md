@@ -8,11 +8,14 @@ OpenSearch provides a wealth of features for searching your data. In this sectio
 ## Schema and mapping
 
 When you use OpenSearch, you can apply a schema, called the `mapping` to your index. The mapping determines how OpenSearch analyzes and enables the fields in your JSON documents for retrieval. OpenSearch has automatic schema detection for quick starts, but for most situations, it's best to set the schema directly. You do this when you create the index. Of coourse, OPEA and the OpenSearch microservice have set the mapping for you, but you can retrieve it for the embeddings index with the below command.
-```bash
+
+```
 curl -XGET https://localhost:9200/rag-opensearch/_mapping --insecure -u admin:strongOpea0! | jq .
 ```
+
 You should see a response like this:
-```JSON
+
+```
 {
     "rag-opensearch": {
         "mappings": {
@@ -41,6 +44,7 @@ You should see a response like this:
                             "m": 16
 }}}}}}}
 ```
+
 There are three fields for the `rag-opensearch` index: `metadata`, `text`, and `vector_field`. The `metadata` field expects nested JSON, with a `source` field. You access nested JSON for queries using dot notation - `metadata.source`. You can see that the `metadata.source`, and `text` fields are defined as type `text` with a subfield of type `keyword`. `text` type fields are [parsed, and their terms are `analyzed`](https://opensearch.org/docs/latest/analyzers/) to produce tokens for matching. `keyword` fields, in contrast, are [`normalized` and queried for exact match](https://opensearch.org/docs/latest/analyzers/normalizers/). The final field is the `vector_field`, a `knn_vector` type field to hold vectors with 768 dimensions. The storage engine is [Non-Metric Space Library](https://github.com/nmslib/), using the Hidden Navigable Small Worlds (HNSW) algorithm. 
 
 ## Lexical queries
@@ -51,7 +55,8 @@ OpenSearch is a lexical search engine in addition to being a vector search engin
 {{% /notice %}}
 
 Execute the following command to run the query
-```bash
+
+```
 curl -XGET https://localhost:9200/rag-opensearch/_search \
   --insecure -u "admin:strongOpea0!" \
   -H "Content-type: application/json" \
@@ -70,6 +75,7 @@ curl -XGET https://localhost:9200/rag-opensearch/_search \
   }
 }' | jq
 ```
+
 The first line of the above command executes the `curl` command. The URL contains the endpoint (`localhost:9200`, which is forwarded to the OpenSearch microservice) and the API specification. In this case, you are directing the query to the `rag-opensearch` index, and calling the `_search` API. The following lines specify the TLS and authentication parameters and then, following the `-d` parameter, the body of the request specifies the query.
 
 This query is a [simple query string query](https://opensearch.org/docs/latest/query-dsl/full-text/simple-query-string/), for the text "what is nike's 2023 revenue?". `simple_query_string` takes a text query, analyzes the text to produce individual tokens -- technically `terms` -- and matches them to the `text` field in all of the documents in the index. It scores and sorts the results based on the TF/IDF scoring algorithm to bring the most relevant document to the top. 
@@ -79,6 +85,7 @@ The additional directives in the query tell OpenSearch to remove all fields from
 Finally, the command line pipes the query results to `jq` to format the json and make it legible.
 
 You should see output like this:
+
 ```
 {
   "took": 8,
@@ -115,6 +122,7 @@ You should see output like this:
   }
 }
 ```
+
 OpenSearch's response contains an initial metadata section that reports the `took` (server side) time for processing the query (8 ms in this case), whether the query timed out, and a section on the shards responding. There follows the `hits` (matches), with the `total` number of matches, the maximum score, and then the matching documents themselves. Each document has the `_index` it came from, the document's `_id`, the score for that document, the source fields (excluded by the query in this example), and a set of highlight snippets. The highlights use HTML `em` tags to show where the query terms matched portions of the document.
 
 This response is not so great. You can see that the response has mentions of Nike, but includes unimportant terms like `what` and `is`. 
@@ -126,14 +134,17 @@ You can experiment with different query terms, replacing the `"query"` text ("wh
 Try running the query as an exact k-Nearest-Neighbor query. First, you'll need to get the embedding for the query. Use the below command to retrieve the embedding from the `chatqna-tei` microservice. This microservice returns an array of arrays, but you just need the inner array for the OpenSearch query. The `jq` pops the 0th element and puts it in `$embedding`. 
 
 In order to run the command, you'll need the port you used to forward to the tei microservice above. You can use the `ps aux | grep kubectl` command-line command to see which processes are running and what ports they are mapping. If you have followed along with the guide, you should have the `chatqna-tei` microservice running on port 9800.
-```bash
+
+```
 embedding=$(curl -X POST localhost:9800/embed \
     -d '{"inputs":"What was the Nike revenue in 2023?"}' \
     -H 'Content-Type: application/json')
 embedding=`echo $embedding | jq '.[0]'`
 ```
+
 You can use `echo $embedding` to see the generated embedding. Now you'll create the local file `query.json` with the embeding merged into the query, and then run an exact k-Nearest-Neighbors (k-NN) query to compare the query embeddingg to every document (chunk) in the index and retrieve the closest matches.
-```bash
+
+```
 echo "{ \
     \"size\": 2, \
     \"_source\": \"text\", \
@@ -153,9 +164,11 @@ curl -XGET https://localhost:9200/rag-opensearch/_search \
   -H "Content-type: application/json" \
   -d @query.json | jq .
 ```
+
 This query is a `script_score` query, employing a saved script to do k-NN score calculation, comparing the query vector to every document in the index. The `script_score` query includes a sub-`query`, which you can use to apply filters to non-vector fields. ChatQnA just sends the file key in the `metadata.source` field, so this query just uses a `match_all`, which matches every document in the index. The `script` portion of the query specifies the `knn_score` script, with parameters that tell the script which `field` has the vector embedding for the doc, passes the embedding as the `query_value` and specifies **l2** as the distance metric (`space_type`).
 
 You should see a response like this:
+
 ```
 {
   "took": 31,
@@ -189,10 +202,12 @@ You should see a response like this:
           "text": "(INCL. HEDGES) SELLING PRICE\n(NET OF\nDISCOUNTS)*.Table of Contents\nFISCAL 2023 NIKE BRAND REVENUE HIGHLIGHTS\nThe following tables present NIKE Brand revenues disaggregated by reportable operating segment, distribution channel and major product line:\nFISCAL 2023 COMPARED TO FISCAL 2022\n• NIKE, Inc. Revenues were $51.2 billion in fiscal 2023, which increased 10% and 16% compared to fiscal 2022 on a reported and currency-neutral basis, respectively.\nThe increase was due to higher revenues in North America, Europe, Middle East & Africa (\"EMEA\"), APLA and Greater China, which contributed approximately 7, 6,\n2 and 1 percentage points to NIKE, Inc. Revenues, respectively.\n• NIKE Brand revenues, which represented over 90% of NIKE, Inc. Revenues, increased 10% and 16% on a reported and currency-neutral basis, respectively. This\nincrease was primarily due to higher revenues in Men's, the Jordan Brand, Women's and Kids' which grew 17%, 35%,11% and 10%, respectively, on a wholesale\nequivalent basis.\n• NIKE Brand footwear revenues increased 20% on a currency-neutral basis, due to higher revenues in Men's, the Jordan Brand, Women's and Kids'. Unit\nsales of footwear increased 13%, while higher average selling price (\"ASP\") per pair contributed approximately 7 percentage points of footwear revenue\ngrowth. Higher ASP was primarily due to higher full-price ASP, net of discounts, on a wholesale equivalent basis, and growth in the size of our NIKE Direct"
 }}]}}
 ```
+
 This is the correct response. Notice that the first result contains the text "NIKE, Inc. Revenues were $51.2 billion in fiscal 2023". Highlighting is not supported for vector fields (there's no source text!) so for this query you just received the contents of the `text` field unprocessed.
 
-Exact k-NN is great when you have relatively few documents. However as your document set grows, latency will grow along with it and beyond a few 100s of 1000s of documents, will be too slow. Instead, you can use approximate nearest neighbor search. The below command uses HNSW to find the nearest neighbors.
-```bash
+Exact k-NN is great when you have relatively few documents. However as your document set grows, latency will grow along with it and beyond a few 100s of 1000s of documents, will be too slow. Instead, you can use approximate nearest neighbor search. The below command uses HNSW to find the nearest neighbors. 
+
+```
 echo "{ \
   \"size\": 2, \
   \"_source\": \"text\", \
@@ -207,6 +222,7 @@ curl -XGET https://localhost:9200/rag-opensearch/_search \
   -H "Content-type: application/json" \
   -d @query.json | jq .
 ```
+
 This query is a `knn` query, which uses the algorithm you specified in the field mapping to determine the nearest neighbors. You just pass in a `vector` and a value for `k` (the count of neighbors to retrieve), and opensearch does the rest.
 
 Again, you can see the correct document is the first result retrieved. Using approximate k-NN you can scale your OpenSearch vector database to billions of vectors and 1000s of queries per second.
@@ -214,7 +230,8 @@ Again, you can see the correct document is the first result retrieved. Using app
 ## Hybrid search with OpenSearch
 
 [OpenSearch supports hybrid search](https://opensearch.org/docs/latest/search-plugins/hybrid-search/) -- where you specify both a lexical and vector query, along with a normalization and merge strategy. OpenSearch runs both queries normalizes and merges the results. When you perform hybrid search, you set a [Search Pipeline](https://opensearch.org/docs/latest/search-plugins/search-pipelines/index/), and send queries through that pipeline. Use the below command to use OpenSearch's REST API to set a search pipeline.
-```bash
+
+```
 curl -XPUT https://localhost:9200/_search/pipeline/nlp-search-pipeline \
   --insecure -u "admin:strongOpea0!" \
   -H "Content-type: application/json" \
@@ -234,10 +251,12 @@ curl -XPUT https://localhost:9200/_search/pipeline/nlp-search-pipeline \
               0.7
 ]}}}}]}'
 ```
+
 This pipeline uses [min/max normalization](https://en.wikipedia.org/wiki/Normalization_(statistics)) to set all of the lexical and vector scores in the range `[0, 1]`. It uses the arithmetic mean to combine the scores, with a weight of `0.3` for the first query clause and `0.7` for the second query clause. Note, this is not a query itself, when you send queries to this search pipeline, OpenSearch applies the weights. The `phase_results_processor` is a flexible, generic construct - the query clauses can be either lexical or vector.
 
 To use the pipeline, you send a query to the pipeline API. Use the below command to create the query in the file `hybrid_query.json`.
-```bash
+
+```
 echo "{ \
   \"_source\": { \"excludes\": \"vector_field\"}, \
   \"size\": 4, \
@@ -257,9 +276,11 @@ curl -XGET https://localhost:9200/rag-opensearch/_search?search_pipeline=nlp-sea
   -H "Content-type: application/json" \
   -d @hybrid_query.json | jq .
 ```
+
 This hybrid query contains two sub-queries - a lexical query for "footwear revenue" and a vector query with an embedding representing "What is Nike 2023 revenue?". The value for `k`, 2, ensures that the results will contain at most two vector matches.
 
 The `curl` command sends this query to the `nlp-search-pipeline` you just defined. You should get these results (we've removed the result metadata and other portions to show the relevant output)
+
 ```
 "_score": 0.7,
 "text": "believe will further accelerate our digital transformation. We believe this unified
@@ -337,6 +358,7 @@ discounts, primarily\ndue to strategic pricing actions and product mix.\n• Sel
 administrative expense increased 4% due to higher operating overhead and demand creation
 expense. Operating overhead expense increased primarily"
 ```
+
 You can see the first match is identical to the approximate nearest-neighbor query above. The second and fourth match are from the lexical query "footwear revenue", and the second query is from the vector match. You've blended the more abstract, semantic information on revenue with the more concrete matches for "footwear revenue". When building search systems, you may not know exactly the types of queries that your users will run. By employing hybrid queries like this one, you can present results that are semantic and results that are lexical.
 
 You can also swap the weights in the `nlp-search-pipeline` to see how that changes the order of the results. If you set the weight for the first clause (the lexical clause in the query) to 0.9 and the vector to 0.1, you'll see the first result changes to the result that begins `• Footwear revenues increased 25% on a currency-neutral basis,...`, with a score of 0.9, and the vector match which contains the text `In fiscal 2023, NIKE, Inc. achieved record Revenues of $51.2 billion` moves to the second position, with a score of 0.1. All of the other vector matches come after that.

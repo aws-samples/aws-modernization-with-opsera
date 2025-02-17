@@ -33,14 +33,17 @@ Kubernetes enables the isolation of development environments through the use of 
 If you have been logged out of your CloudShell, click in the CloudShell window to restart the shell, or click the icon in the AWS Console to open a new CloudShell
 
 1. Go to your CloudShell and deploy the ChatQnA-Guardrails ClourFormation template into your EKS Cluster
-```bash
+
+```
 aws cloudformation execute-change-set --change-set-name guardrails-change-set --stack-name OpeaGuardrailsStack
 ```
+
 {{% notice note %}}The manifest for *ChatQnA-Guardrails* can be found in the [ChatQnA GenAIExamples repository](https://github.com/opea-project/GenAIExamples/blob/main/ChatQnA/kubernetes/intel/cpu/xeon/manifest/chatqna-guardrails.yaml), and the instructions for deploying it manually can be found [here](https://github.com/opea-project/GenAIExamples/blob/main/ChatQnA/kubernetes/intel/README.md). The instructions you're using in this workshop use AWS CloudFormation templates created by the AWS Marketplace EKS package.
 {{% /notice %}}
 
 2. Verify the new namespace was created
-```bash
+
+```
 kubectl get namespaces
 ```
 You will see the `guardrails` namespace
@@ -50,9 +53,11 @@ You will see the `guardrails` namespace
 3. Check pods on the `guardrails` namespace. It will take a few minutes for the models to download and for all the services to be up and running.
 
 Run the following command to check if all the services are running:
-```bash
+
+```
 kubectl get pods --namespace guardrails
 ```
+
 ![new_pods](/images/guardrails_pods.png)
 
 Wait until the output shows that all the services including `chatqna-tgi-guardrails` and `chatqna-guardrails-usvc`  are running (1/1).

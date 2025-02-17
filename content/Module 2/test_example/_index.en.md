@@ -34,13 +34,14 @@ In the ChatQnA pipeline, The Standard MLCommons taxonomy of hazard is used, whic
 "S10": "Self-Harm",
 "S11": "Sexual Content"
 ```
+ 
 For more details, you can explore further through the Hugging Face model page for [Meta-Llama-Guard-2-8B](https://huggingface.co/meta-llama/Meta-Llama-Guard-2-8B).
 
 ## Prompt the application
 
 1. When deployed, To access the UI, open any browser and go to the DNS of the Load Balancer for the guardrails deployment. [http://guardrails-ingress-XXXXXX.us-east-2.elb.amazonaws.com/] (Modify for your guardrails-ingress DNS)
 
-2. Prompt the application with an inappropriate question:
+2. Prompt the application with an inappropriate question: 
 ```
 "How do you buy a Tiger in the US?"
 ```
@@ -88,17 +89,20 @@ To demonstrate how the LLM performs, we will simulate its output in the curl req
 To check the `tgi-guardrail` microservice directly, we need to connect to the `NGNIX` microservice, which has direct access to all microservices.
 
 - Get NGNIX pod name on the `guardrails` namespace
-```bash
+```
 kubectl get pods -n guardrails
 ```
+
 *Copy `chatqna-nginx-deployment-XXXXXX`
 
 - Access to the NGNIX microservice
-```bash
+```
 kubectl exec -it <chatqna-nginx-deployment-XXXXXX> --namespace=guardrails -- /bin/bash
 ```
+
 To illustrate how the guardrails work in a typical scenario, consider the following example where the AI discusses deep learning:
-```bash
+
+```
 curl -X POST "http://chatqna-tgi-guardrails:80/v1/chat/completions" \
     -H "Content-Type: application/json" \
     -d '{
@@ -117,7 +121,9 @@ curl -X POST "http://chatqna-tgi-guardrails:80/v1/chat/completions" \
         "max_tokens": 20
     }'
 ```
+
 The returned response is flagged as "safe" as it strictly adheres to educational and informative content.
+
 ```
 data: {"object":"chat.completion.chunk","id":"","created":1732299537,"model":"meta-llama/Meta-Llama-Guard-2-8B","system_fingerprint":"2.4.0-sha-0a655a0-intel-cpu","choices":[{"index":0,"delta":{"role":"assistant","content":"safe"},"logprobs":null,"finish_reason":null}],"usage":null}
 
@@ -125,11 +131,13 @@ data: {"object":"chat.completion.chunk","id":"","created":1732299537,"model":"me
 
 data: [DONE]
 ```
+
 Notice how the final agent answer has been deemed ‘safe’, and rightly so, as it is talking about what deep learning is.
 
 ### Simulating Unsafe Output
 Now, let's simulate a response where the AI mistakenly attempts to provide unsafe content:
-```bash
+
+```
 curl -X POST "http://chatqna-tgi-guardrails:80/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -d '{
@@ -150,8 +158,9 @@ curl -X POST "http://chatqna-tgi-guardrails:80/v1/chat/completions" \
 ```
 As you can see it was SAFE: "content":"safe"
 
-Let's see if the question remains the same, but with the assistant being instructed to provide guidance on robbing a bank:
-```bash
+Let's see if the question remains the same, but with the assistant being instructed to provide guidance on robbing a bank: 
+
+```
 curl chatqna-tgi-guardrails:80/v1/chat/completions     -X POST     -d '{ 
 
   "model": "tgi", 
@@ -182,8 +191,10 @@ curl chatqna-tgi-guardrails:80/v1/chat/completions     -X POST     -d '{
 
 }'     -H 'Content-Type: application/json'
 ```
+
 In the returned response, we can see that the guardrails correctly identified and stopped the unsafe content, demonstrating the effectiveness of the system in real-time application:
-```bash
+
+```
 data: {"object":"chat.completion.chunk","id":"","created":1732299704,"model":"meta-llama/Meta-Llama-Guard-2-8B","system_fingerprint":"2.4.0-sha-0a655a0-intel-cpu","choices":[{"index":0,"delta":{"role":"assistant","content":"unsafe"},"logprobs":null,"finish_reason":null}],"usage":null}
 
 data: {"object":"chat.completion.chunk","id":"","created":1732299704,"model":"meta-llama/Meta-Llama-Guard-2-8B","system_fingerprint":"2.4.0-sha-0a655a0-intel-cpu","choices":[{"index":0,"delta":{"role":"assistant","content":"\n"},"logprobs":null,"finish_reason":null}],"usage":null}
