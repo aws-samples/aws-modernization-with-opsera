@@ -15,9 +15,9 @@ Since you already set up your access to your Kubernetes clustes from "Getting Se
 
 1. Go to your CloudShell and deploy the ChatQnA ClourFormation template into your EKS Cluster
 
-```bash
+``````
 aws cloudformation execute-change-set --change-set-name default-change-set --stack-name OpeaChatQnAStack
-```
+:::
 
 ### Step 2: Examine Cluster Resources
 
@@ -34,7 +34,7 @@ This section in the console displays all the applications currently running with
 
 3. Get pod names (default namespace)
 
-::code[kubectl get pods]{showCopyAction=true language=bash} 
+```{showCopyAction=true language=bash} ```
 
 
 The output has to display all the pods "Running" (1/1)
