@@ -21,7 +21,8 @@ Every OPEA configuration is built on three main parts:
 
 Before start exploring, consider that only the **gateway** and **UI** services are exposed externally. In this task, you'll access each internal microservice directly to run tests, using the gateway (Nginx) to streamline access to these internal services. 
 
-::alert[You’ll need to take note of all pods deployed.]{type="info"}
+[!IMPORTANT]
+You’ll need to take note of all pods deployed.
 
 `kubectl get svc` lists all services in a Kubernetes cluster, showing their names, types, cluster IPs, and exposed ports. It provides an overview of how applications are exposed for internal or external access. 
 
