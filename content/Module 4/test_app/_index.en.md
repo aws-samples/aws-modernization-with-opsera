@@ -23,9 +23,9 @@ In the UI you can see the chatbot to interact with it
 
 4. Check if the model is able to give us an answer about OPEA:
 
-:::code{showCopyAction=true}
+```
 What is OPEA?
-:::
+```
 
 ![Alt text](/images/Bedrock_bad.png)
 
