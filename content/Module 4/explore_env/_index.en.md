@@ -55,9 +55,9 @@ This module works with just about any text-generation LLM supported by Bedrock, 
 
 ### Confirming Deployment
 Now let's confirm that our Bedrock deployment is complete. You can onitor the state of the Bedrock pods using the ```kubectl``` command:
-:::code
+```
 kubectl get pods -n bedrock
-:::
+```
 
 ...to get output like this:
 
