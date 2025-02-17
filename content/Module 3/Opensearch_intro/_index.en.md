@@ -26,21 +26,20 @@ Thanks to the interchangeability offered by OPEA, most of the components from th
 
 For this lab, we've created a changeset that you can deploy that contains a full, parallel deployment of the ChatQnA example, in the same Kubernetes cluster you've been using. We've wrapped all of the changes you need in an AWS CloudFormation changeset that you deploy with the command below.
 
-:::alert
-We've used a Kubernetes namespace, `opensearch`, to separate out the pods and services pertaining to the OpenSearch deployment. When you use `kubectl` and other Kubernetes commands in the below examples, be sure to qualify the command with `-n opensearch`.
-:::
+{{% notice note %}}We've used a Kubernetes namespace, `opensearch`, to separate out the pods and services pertaining to the OpenSearch deployment. When you use `kubectl` and other Kubernetes commands in the below examples, be sure to qualify the command with `-n opensearch`.
+{{% /notice %}}
 
 Return to your Cloud Shell. If the shell has terminated, click in the window to open a new command line, or use the icon at the top of the AWS console to start a new Cloud Shell. Use the following command to deploy the OpenSearch change set.
 
-:::code{showCopyAction=true, language=bash}
+```bash
 aws cloudformation execute-change-set --change-set-name opensearch-change-set --stack-name OpeaOpensearchStack
-:::
+```
 
 OpenSearch will take a few minutes to deploy. To check the status, you can use `kubectl` to monitor the state of the OpenSearch pods. You can use the command
 
-:::code{showCopyAction=true, language=bash}
+```bash
 kubectl get pods -n opensearch
-:::
+```
 
 to get output like this
 
@@ -89,9 +88,8 @@ OpenSearch distributes the shards across the available data nodes in the cluster
 
 When sizing your cluster, here are some guidelines to help you achieve success.
 
-:::alert
-Amazon OpenSearch Service's documentation also includes best practices on a number of topics, including [sizing OpenSearch Service domains](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/sizing-domains.html). While these best practices are service-specific, the documentation details first principles that will help you size your self-managed domain as well.
-:::
+{{% notice note %}}Amazon OpenSearch Service's documentation also includes best practices on a number of topics, including [sizing OpenSearch Service domains](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/sizing-domains.html). While these best practices are service-specific, the documentation details first principles that will help you size your self-managed domain as well.
+{{% /notice %}}
 
 * First, calculate the storage needed for your metadata and vectors. You can use
 
@@ -114,21 +112,20 @@ Amazon OpenSearch Service's documentation also includes best practices on a numb
 
 To verify the deployment, you will use Kubernetes port forwarding to call the various microservices. You can verify the OpenSearch deployment is working by executing a `GET` request against the base URL. OpenSearch listens on port 9200. Use the following command to map port 9200 to your local port 9200. (If your Cloud Shell terminal has terminated, click in the window or open a new terminal from the AWS console.)
 
-:::code{showCopyAction=true language=bash}
+```bash
 kubectl port-forward -n opensearch svc/opensearch-cluster-master 9200:9200 &
-:::
+```
 
-:::alert
-In this section of the guide, you will use port forwarding for a number of services. The port forwarding takes a few seconds to start, be sure to wait for a confirmation line looking like this: `Forwarding from 127.0.0.1:9200 -> 9200`.
-:::
+{{% notice note %}}In this section of the guide, you will use port forwarding for a number of services. The port forwarding takes a few seconds to start, be sure to wait for a confirmation line looking like this: `Forwarding from 127.0.0.1:9200 -> 9200`.
+{{% /notice %}}
 
 Now you can query OpenSearch directly on `localhost:9200`. OpenSearch supports encrypted communication via Transport Layer Security (TLS), and ships with a demo certificate that is not signed by an authority. For demo purposes, you'll use the `--insecure` option for `curl`. OpenSearch's fine-grained access control supports an internal user/password database for basic HTTP authentication. It can also integrate with Security Assertion Markup Language (SAML) identity providers for login to OpenSearch Dashboards (OpenSearch's user interface). You'll provide HTTP authentication with your `curl` request.
 
 A query to `/` simply returns cluster health and information.
 
-:::code{showCopyAction=true language=bash}
+```bash
 curl -XGET https://localhost:9200/ --insecure -u admin:strongOpea0!
-:::
+```
 
 You should receive output like this:
 
@@ -162,23 +159,23 @@ You can work with the individual microservices in the OpenSearch deployment in t
 
 Download the sample pdf document with the below command
 
-:::code{showCopyAction=true language=bash}
+```bash
 curl -C - -O https://raw.githubusercontent.com/opea-project/GenAIComps/main/comps/third_parties/pathway/src/data/nke-10k-2023.pdf
-:::
+```
 
 Now you can use the `chatqna-data-prep` service to send that document to OpenSearch. Use the following command to map local port 6007 to the services port 6007.
 
-:::code{showCopyAction=true language=bash}
+```bash
 kubectl port-forward -n opensearch svc/chatqna-data-prep 6007:6007 &
-:::
+```
 
 Wait until you see the message `Forwarding from 127.0.0.1:6007 -> 6007`, and then send the document.
 
-:::code{showCopyAction=true language=bash}
+```bash
 curl -X POST "localhost:6007/v1/dataprep" \
      -H "Content-Type: multipart/form-data" \
      -F "files=@./nke-10k-2023.pdf"
-:::
+```
 
 Data prep will take about 30 seconds processing the document. When it's done you will see
 
@@ -186,9 +183,9 @@ Data prep will take about 30 seconds processing the document. When it's done you
 
 To see how OPEA uses OpenSearch, you can query OpenSearch directly. One of OpenSearch's core sets of APIs is the Compact Aligned Text (`_cat`) API. The `_cat` API (most OpenSearch APIs begin with an underscore, `_`) is an administrative API that retrieves information on your cluster, indices, nodes, shards, and more. To see the indices in OpenSearch, execute the following command (if your Cloud Shell has terminated, you'll need to re-establish the port forwarding. See above for instructions)
 
-:::code{showCopyAction=true language=bash}
+```bash
 curl -XGET 'https://localhost:9200/_cat/indices?v' --insecure -u admin:strongOpea0!
-:::
+```
 
 You should see output like this:
 
@@ -211,54 +208,54 @@ The `pri.store.size` gives the size in bytes of the on-disk data for all of the 
 
 Now that there's data loaded, you can test OpenSearch's retrieval with the `retriever` microservice. First, you need to use the embedding service to create an embedding for your query ("What was the Nike revenue in 2023?"). Execute the following command to get the embedding and store it in the `response` bash variable. Establish port forwarding for the `chatqna-tei` microservice:
 
-:::code{showCopyAction=true language=bash}
+```bash
 kubectl port-forward -n opensearch svc/chatqna-tei 9800:80 &
-:::
+```
 
 Again, wait until you receive the `Forwarding from 127.0.0.1:9800` message, then send the query text and store the embedding in the `question_embedding` shell variable.
 
-:::code{showCopyAction=true language=bash}
+```bash
 question_embedding=$(curl localhost:9800/embed \
     -X POST \
     -d '{"inputs":"What was the Nike revenue in 2023?"}' \
     -H 'Content-Type: application/json')
-:::
+```
 
 To verify that this call succeeded, you can use `echo $question_embedding` to see the vector embedding. Now use the following command to call the `retriever` microservice and find matching documents from OpenSearch and store them in the `similar_docs` bash variable. Establish port forwarding:
 
-:::code{showCopyAction=true language=bash}
+```bash
 kubectl port-forward -n opensearch svc/chatqna-retriever-usvc 9801:7000 &
-:::
+```
 
 After the shell acknowledges that it's forwarding, run the retrieval
 
-:::code{showCopyAction=true language=bash}
+```bash
 similar_docs=$(curl http://localhost:9801/v1/retrieval \
     -X POST \
     -d "{\"text\":\"test\",\"embedding\":${question_embedding}}" \
     -H 'Content-Type: application/json')
-:::
+```
 
 Again, you can verify the retrieval with `echo $similar_docs | jq .`. Now you can explore the reranker, contacting it directly with the similar docs and compare with the question *What was Nike Revenue in 2023?*. The `chatqna-teirerank` service expects an array of text blocks. Execute the following commands to reformat `$similar_docs` and save the result in the local file `rerank.json`
 
-:::code{showCopyAction=true language=bash}
+```bash
 texts=$(echo "$similar_docs" | jq -r '[.retrieved_docs[].text | @json]')
 echo "{\"query\":\"What was Nike Revenue in 2023?\", \"texts\": $texts}" | jq -c . > rerank.json
-:::
+```
 
 Now establish port forwarding for the `chatqna-teirerank` service.
 
-:::code{showCopyAction=true language=bash}
+```bash
 kubectl port-forward -n opensearch svc/chatqna-teirerank 9802:80 &
-:::
+```
 
 Once the shell responds that it's forwarding, execute the following command to see the rerank results
 
-:::code{showCopyAction=true language=bash}
+```bash
 curl -X POST localhost:9802/rerank \
   -d @rerank.json\
   -H 'Content-Type: application/json'
-:::
+```
 
 You should see output like this. In this case, the top-retrieved item still has the best score after reranking, followed by the third, first, and second.
 
@@ -268,9 +265,9 @@ OPEA will use the first result as context for the `chatqna-tgi` service. You've 
 
 As a final test, you can send the query to the load balancer to see the result. Use the following command to get the address of the load balancer: 
 
-:::code{showCopyAction=true language=bash}
+```bash
 kubectl get ingress -n opensearch
-:::
+```
 
 You should see output like this
 

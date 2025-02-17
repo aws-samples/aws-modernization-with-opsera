@@ -50,9 +50,8 @@ aws sts get-caller-identity --query 'Arn' --output text | awk -F: '{print $NF}' 
 
     - *RemoteInferenceClientId* ,*RemoteInferenceClientSecret* & *RemoteInferenceURL*: Enter your provided credentials and URL to enable Remote Inference LLM on Denver Datanetworks, leveraging Intel Gaudi 2 for optimized performance.
 
- :::alert
- Mark the checkbox next to `I acknowledge that AWS CloudFormation might create IAM resources`
-:::
+ {{% notice note %}}Mark the checkbox next to `I acknowledge that AWS CloudFormation might create IAM resources`
+{{% /notice %}}
     
 Once you've performed those activities, click the button that says `Create Stack`
 

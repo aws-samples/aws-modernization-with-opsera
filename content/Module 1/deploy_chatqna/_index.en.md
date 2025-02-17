@@ -5,7 +5,7 @@ weight = 200
 ## Introduction
 In this section, you’ll deploy the OPEA blueprint for a RAG application (ChatQnA) on Amazon Elastic Kubernetes Service (EKS) environment.  This exploration will give you a better understanding of how the RAG application operates within a managed Kubernetes environment, allowing you to inspect the specific components and their roles in the system. You will have this configuration avaiable from [AWS Marketplace site](https://aws.amazon.com/marketplace/pp/prodview-yxrr7gseopq5e). ChatQnA is a RAG chatbot located in OPEA's GenAIExamples repository. 
 
-:button[ChatQnA on GitHub]{iconName="external" iconAlign="right" href="https://github.com/opea-project/GenAIExamples/tree/main/ChatQnA"}
+[🔗 ChatQnA on GitHub](https://github.com/opea-project/GenAIExamples/tree/main/ChatQnA)
 
 ![OPEA Architecture](/images/opeaad.png)
 
@@ -15,9 +15,9 @@ Since you already set up your access to your Kubernetes clustes from "Getting Se
 
 1. Go to your CloudShell and deploy the ChatQnA ClourFormation template into your EKS Cluster
 
-:::code{showCopyAction=true language=bash}
+```bash
 aws cloudformation execute-change-set --change-set-name default-change-set --stack-name OpeaChatQnAStack
-:::
+```
 
 ### Step 2: Examine Cluster Resources
 
