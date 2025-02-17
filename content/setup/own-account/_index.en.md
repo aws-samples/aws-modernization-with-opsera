@@ -41,9 +41,9 @@ The stack sets up the following components:
     
         Or run the following command to get your arn
 
-```
+:::code{showCopyAction=true}
 aws sts get-caller-identity --query 'Arn' --output text | awk -F: '{print $NF}' | (read id; if [[ $id == *"user"* ]]; then aws sts get-caller-identity --query 'Arn' --output text; else role=$(echo $id | cut -d'/' -f2); aws iam get-role --role-name $role --query 'Role.Arn' --output text; fi)
-```
+:::
 
 
     **ONLY FOR MODULE 4: In case you will be deploying Remote Inference**

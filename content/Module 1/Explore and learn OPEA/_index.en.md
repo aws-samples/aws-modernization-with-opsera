@@ -28,13 +28,13 @@ Before start exploring, consider that only the **gateway** and **UI** services a
 
 Run the following command on your CloudShell:
 
-```
+```bash
 kubectl get svc
 ```
 
 You will see output similar to this:
 
-```
+```bash 
 NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)             AGE
 chatqna                   ClusterIP   XXX.XXX.XXX       <none>        8888/TCP            12h
 chatqna-chatqna-ui        ClusterIP   XXX.XXX.XXX       <none>        5173/TCP            12h
@@ -71,7 +71,7 @@ This service isn't directly exposed, but you can access it directly from the Loa
 
 You will use curl to send a request to an API endpoint to test the functionality of each microservice separately. The purpose is to ask a question, such as **"What was the revenue of Nike in 2023?"**, and verify that the API responds correctly. This helps ensure that all services are working as expected.
 
-```
+```bash
 curl http://<**Chatqna-ingress Load Balancer DNS**>/v1/chatqna     
     -H "Content-Type: application/json"     
     -d '{"messages": "What was the revenue of Nike in 2023?"}'
@@ -138,7 +138,7 @@ Once inside, you will now have direct access to the internal pods.
 
 2. Get the embedding from the Embeddings Microservice for the phrase *"What was Deep Learning?"*:
 
-```
+```bash
 curl chatqna-tei:80/embed \
     -X POST \
     -d '{"inputs":"What was Deep Learning?"}' \
@@ -170,12 +170,12 @@ To test it and help the model answer the initial question **What was Nike revenu
 Execute the following command to download a sample [Nike revenue report](https://github.com/opea-project/GenAIComps/blob/main/comps/retrievers/redis/data/nke-10k-2023.pdf) to the nginx pod (if you are no longer logged in to the NGinx pod, be sure to use the above command to log in again):
 
 1.  Download the document to the microservice :
-```
+```bash
 curl -C - -O https://raw.githubusercontent.com/opea-project/GenAIComps/main/comps/third_parties/pathway/src/data/nke-10k-2023.pdf
 ```
 
 2.  Feed the knowledge base (Vectord) with the document (It will take ~30 seconds):
-```
+```bash
 curl -X POST "chatqna-data-prep:6007/v1/dataprep" \
      -H "Content-Type: multipart/form-data" \
      -F "files=@./nke-10k-2023.pdf"
@@ -183,7 +183,7 @@ curl -X POST "chatqna-data-prep:6007/v1/dataprep" \
 
 After running the previous command, you should receive a confirmation message like the one below. This command updated the knowledge base by uploading a local file for processing.
 
-```
+```json
     {
         "status": 200,
         "message": "Data preparation succeeded"
@@ -194,14 +194,14 @@ The data preparation microservice API can retrieve information about the list of
 
 3. Verify if the document was uploaded:
 
-```
+```bash
 curl -X POST "chatqna-data-prep:6007/v1/dataprep/get_file" \
      -H "Content-Type: application/json"
 ```
 
 After running the previous command, you should receive the confirmation message. 
 
-```
+```json 
     {
         "name": "nke-10k-2023.pdf",
         "id": "nke-10k-2023.pdf",
@@ -239,7 +239,7 @@ To create the embedding, use the `chatqna-tei` microservice (again, make sure yo
 
 1. Create the embedding and save locally (embed_question):
 
-```
+```bash
 embed_question=$(curl chatqna-tei:80/embed \
     -X POST \
     -d '{"inputs":"What was the Nike revenue in 2023?"}' \
@@ -264,19 +264,19 @@ You are now able to use the retriever microservice to get the most similar infor
 
 3. Get and save similar vectors from the initial `embed_question` locally `similar_docs`:
 
-```
+```bash
 similar_docs=$(curl chatqna-retriever-usvc:7000/v1/retrieval -X POST   -d "{\"text\":\"test\",\"embedding\":${embed_question}}"   -H 'Content-Type: application/json')
 ```
 
 By looking at the previous output, you can see the most similar passages (TOP_3) from the document [Nike revenue report](https://github.com/opea-project/GenAIComps/blob/main/comps/retrievers/redis/data/nke-10k-2023.pdf) and the question **"What was the Nike revenue in 2023?"**.
 
-```
+```bash
 echo $similar_docs
 ```
 
 {{% notice note %}}The following output has been formatted for better readability. Your results will be presented in plain text and may vary slightly due to the similarity search algorithm. However, you can double check that the retrieved documents will be relevant to your initial query.
 {{% /notice %}}
-```
+```json 
 {
     "id": "eb5a39b6f8b42b90fbf9ebc5f850ffd5",
     "retrieved_docs": [{
@@ -343,19 +343,19 @@ Extract the 3 retrieved text snippets and save them in a new variable to be rera
 
 1. Install jq dependencies to format `similar_docs`
 
-```
+```bash
 echo -e "deb http://deb.debian.org/debian bookworm main contrib non-free\ndeb http://security.debian.org/debian-security bookworm-security main contrib non-free\ndeb http://deb.debian.org/debian bookworm-updates main contrib non-free" > /etc/apt/sources.list && apt update && apt install -y jq
 ```
 
 2. Extract and format the texts into a valid JSON array of strings
 
-```
+```bash
 texts=$(echo "$similar_docs" | jq -r '[.retrieved_docs[].text | @json]')
 ```
 
 3. Send the request to the microservice with the query and the formatted texts:
 
-```
+```bash
 curl -X POST chatqna-teirerank:80/rerank \
   -d "{\"query\":\"What was Nike Revenue in 2023?\", \"texts\": $texts}" \
   -H 'Content-Type: application/json'
@@ -365,7 +365,7 @@ curl -X POST chatqna-teirerank:80/rerank \
 {{% notice note %}}The following output has been formatted for better readability. Your results are displayed in plain text and **may vary slightly due to the similarity search algorithm**. The retrieved documents are ranked by similarity to your query, with the highest-ranked index representing the most relevant match. You can confirm that the top-ranked document corresponds to the one most closely aligned with your query.
 {{% /notice %}}
 
-```
+```json
     {
         "index": 2,
         "score": 0.9972289
@@ -389,7 +389,7 @@ The server responds with a JSON array containing objects with two fields: index 
 
 As you can see from `similar_doc` the id=2 has the below information where it EXACTLY refers to the revenue for 2023!
 
-```
+```json 
 "text": "RESULTS OF OPERATIONS\n(Dollars in millions, except per share data)\nFISCAL 2023\nFISCAL 2022\n% CHANGE\nFISCAL 2021\n% CHANGE
         Revenues\n$51,217 \n$\n46,710 \n10 % $\n44,538 \n5 %\nCost of sales\n28,925 \n25,231 \n15 %\n24,576 \n3 %\nGross profit\n22,292 \n21,479 \n4 %
         19,962 \n8 %\nGross margin\n43.5 %\n46.0 %\n44.8 %\nDemand creation expense\n4,060 \n3,850 \n5 %\n3,114 \n24 %\nOperating overhead expense
@@ -421,7 +421,7 @@ OPEA allows the integration of any option. In this example, we have used the TGI
 For test purposes, you can directly prompt the TGI(LLM) to see if the model can answer to the initial question `What was Nike revenue in 2023?`
 
 1. Directly prompt the TGI(LLM) Microservice:
-```
+```bash
 curl chatqna-tgi:80/generate \
   -X POST \
   -d '{"inputs":"What was Nike revenue in 2023?","parameters":{"max_new_tokens":200, "do_sample": true}}' \
@@ -446,7 +446,7 @@ root@chatqna-nginx-deployment-XXXXXXXXXXXX:/# exit
 Use the load balancer URL you saved above in the below command to send the question "What was Nike's revenue in 2023?" to the ChatQNA application.
 
 3. Run the curl to the load balancer again: 
-```
+```json
 curl http://<**Chatqna-ingress Load Balancer DNS**>/v1/chatqna \
     -H "Content-Type: application/json" \
     -d '{"messages": "What was the revenue of Nike in 2023?"}'
@@ -454,7 +454,7 @@ curl http://<**Chatqna-ingress Load Balancer DNS**>/v1/chatqna \
 
 4. Check your results. You will notice the streaming response, which is normal behavior for the microservice as it streams the answer. A streaming response means the data is sent in smaller chunks as it becomes available rather than all at once. In the application, this response is received by the UI and converted into a readable format, allowing the user to view the data as it arrives in real time.
 
-:::code{showCopyAction=false language=bash}
+```
 data: b' The'
 
 data: b' revenue'

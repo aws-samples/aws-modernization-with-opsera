@@ -89,20 +89,20 @@ To demonstrate how the LLM performs, we will simulate its output in the curl req
 To check the `tgi-guardrail` microservice directly, we need to connect to the `NGNIX` microservice, which has direct access to all microservices.
 
 - Get NGNIX pod name on the `guardrails` namespace
-```
+```bash
 kubectl get pods -n guardrails
 ```
 
 *Copy `chatqna-nginx-deployment-XXXXXX`
 
 - Access to the NGNIX microservice
-```
+```bash
 kubectl exec -it <chatqna-nginx-deployment-XXXXXX> --namespace=guardrails -- /bin/bash
 ```
 
 To illustrate how the guardrails work in a typical scenario, consider the following example where the AI discusses deep learning:
 
-```
+```bash
 curl -X POST "http://chatqna-tgi-guardrails:80/v1/chat/completions" \
     -H "Content-Type: application/json" \
     -d '{
@@ -137,7 +137,7 @@ Notice how the final agent answer has been deemed ‘safe’, and rightly so, as
 ### Simulating Unsafe Output
 Now, let's simulate a response where the AI mistakenly attempts to provide unsafe content:
 
-```
+```bash
 curl -X POST "http://chatqna-tgi-guardrails:80/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -d '{
@@ -160,7 +160,7 @@ As you can see it was SAFE: "content":"safe"
 
 Let's see if the question remains the same, but with the assistant being instructed to provide guidance on robbing a bank: 
 
-```
+```bash
 curl chatqna-tgi-guardrails:80/v1/chat/completions     -X POST     -d '{ 
 
   "model": "tgi", 
@@ -206,7 +206,7 @@ data: {"object":"chat.completion.chunk","id":"","created":1732299705,"model":"me
 data: {"object":"chat.completion.chunk","id":"","created":1732299705,"model":"meta-llama/Meta-Llama-Guard-2-8B","system_fingerprint":"2.4.0-sha-0a655a0-intel-cpu","choices":[{"index":0,"delta":{"role":"assistant","content":""},"logprobs":null,"finish_reason":"stop"}],"usage":null}
 
 data: [DONE]
-```
+:::
 Through vigilant application of these output guardrails, we can ensure that our AI system remains a reliable and trustworthy tool for users. It not only prevents the propagation of harmful content but also reinforces our commitment to upholding the highest standards of AI ethics and safety.
 
 
