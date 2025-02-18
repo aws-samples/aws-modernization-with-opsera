@@ -9,8 +9,8 @@ To configure your account, complete the following steps.
 
 1. Click on Launch Stack below to launch CloudFormation with some pre-configured values in the us-east-1 region. Please remember the change the region if you would like to run this workshop in a different region.
 
-:button[Launch Stack]{variant="primary" iconName="external" iconAlign="right" target="_blank" href="https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://ws-assets-prod-iad-r-iad-ed304a55c2ca1aee.s3.us-east-1.amazonaws.com/50cf2fdb-1972-4e79-814f-12d2e6fb0dab/LaunchStack.yml&stackName=LaunchStack
-"}
+[🔗 Launch Stack](https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?templateURL=https://ws-assets-prod-iad-r-iad-ed304a55c2ca1aee.s3.us-east-1.amazonaws.com/50cf2fdb-1972-4e79-814f-12d2e6fb0dab/LaunchStack.yml&stackName=LaunchStack
+)
 
 The stack sets up the following components:
 
