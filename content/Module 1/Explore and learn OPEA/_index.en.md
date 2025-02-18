@@ -169,13 +169,11 @@ To test it and help the model answer the initial question **What was Nike revenu
 Execute the following command to download a sample [Nike revenue report](https://github.com/opea-project/GenAIComps/blob/main/comps/retrievers/redis/data/nke-10k-2023.pdf) to the nginx pod (if you are no longer logged in to the NGinx pod, be sure to use the above command to log in again):
 
 1.  Download the document to the microservice :
-
 ```bash
 curl -C - -O https://raw.githubusercontent.com/opea-project/GenAIComps/main/comps/third_parties/pathway/src/data/nke-10k-2023.pdf
 ```
 
 2.  Feed the knowledge base (Vectord) with the document (It will take ~30 seconds):
-
 ```bash
 curl -X POST "chatqna-data-prep:6007/v1/dataprep" \
      -H "Content-Type: multipart/form-data" \
@@ -256,7 +254,6 @@ You should get the details about the writing task:
 ```
 
 2. Check to see if your embedding was saved: 
-
 ```bash
 echo $embed_question
 ```
@@ -278,7 +275,6 @@ echo $similar_docs
 
 {{% notice note %}}The following output has been formatted for better readability. Your results will be presented in plain text and may vary slightly due to the similarity search algorithm. However, you can double check that the retrieved documents will be relevant to your initial query.
 {{% /notice %}}
-
 ```bash
 {
     "id": "eb5a39b6f8b42b90fbf9ebc5f850ffd5",
@@ -387,8 +383,8 @@ curl -X POST chatqna-teirerank:80/rerank \
     }
 ```
 
-The server responds with a JSON array containing objects with two fields: index and score. This indicates how the snippets are ranked based on their relevance to the query: :code[{"index":2,"score":0.9972289}] means the first text (index 0) has a high relevance score of approximately 0.7982.
-:code[{"index":0,"score":0.9776342},{"index":3,"score":0.9296986},{"index":1,"score":0.84730965}] indicates that the other snippets (index 3,1 and 2) have a much lower score. 
+The server responds with a JSON array containing objects with two fields: index and score. This indicates how the snippets are ranked based on their relevance to the query: `{"index":2,"score":0.9972289}` means the first text (index 0) has a high relevance score of approximately 0.7982.
+`{"index":0,"score":0.9776342},{"index":3,"score":0.9296986},{"index":1,"score":0.84730965}` indicates that the other snippets (index 3,1 and 2) have a much lower score. 
 
 As you can see from `similar_doc` the id=2 has the below information where it EXACTLY refers to the revenue for 2023!
 
@@ -424,7 +420,6 @@ OPEA allows the integration of any option. In this example, we have used the TGI
 For test purposes, you can directly prompt the TGI(LLM) to see if the model can answer to the initial question `What was Nike revenue in 2023?`
 
 1. Directly prompt the TGI(LLM) Microservice:
-
 ```bash
 curl chatqna-tgi:80/generate \
   -X POST \
@@ -450,7 +445,6 @@ root@chatqna-nginx-deployment-XXXXXXXXXXXX:/# exit
 Use the load balancer URL you saved above in the below command to send the question "What was Nike's revenue in 2023?" to the ChatQNA application.
 
 3. Run the curl to the load balancer again: 
-
 ```bash
 curl http://<**Chatqna-ingress Load Balancer DNS**>/v1/chatqna \
     -H "Content-Type: application/json" \

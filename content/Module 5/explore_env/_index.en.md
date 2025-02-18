@@ -54,28 +54,24 @@ kubectl get pods -n remote-inference
     
     Access to ngnix POD (copy your NGNIX pod name from kubectl get pods -n remote-inference and REPLACE *chatqna-nginx-xxxxxxxx* on the below command)
 
-    
-```bash
+    ```bash
 kubectl exec -it <*POD name:chatqna-nginx-xxxxxxxx*> --namespace=remote-inference -- /bin/bash
 ```
 
     Your command prompt should now indicate that you are inside the container, reflecting the change in environment:
 
-    
-```bash
+    ```bash
 root@chatqna-nginx-deployment-xxxxxxxxxxxx:/#
 ```
 
     Get the "What is Deep Learning? Explain in 20 words"*:
 
-    
-```bash
+    ```bash
 curl chatqna:8888/v1/chatqna -H 'Content-Type: application/json' -d '{"messages": "What is Deep Learning. Exaplain in 20 words?"}'
 ```
 
-    
-```bash
-data: b' \n'
+    :::code{showCopyAction=false}
+    data: b' \n'
 
     data: b'Deep'
 
@@ -118,8 +114,7 @@ data: b' \n'
     data: b''
 
     data: [DONE]
-```
-
+    :::
     
 4. Verify the deployment is done verifying the new load balancer on your managment console
 

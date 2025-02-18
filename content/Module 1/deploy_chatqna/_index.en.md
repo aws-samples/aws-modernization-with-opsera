@@ -34,10 +34,7 @@ This section in the console displays all the applications currently running with
 
 3. Get pod names (default namespace)
 
-```bash
-kubectl get pods
-```
- 
+:`kubectl get pods`{showCopyAction=true language=bash} 
 
 The output has to display all the pods "Running" (1/1)
 
