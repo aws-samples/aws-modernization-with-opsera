@@ -90,27 +90,21 @@ To check the `tgi-guardrail` microservice directly, we need to connect to the `N
 
 - Get NGNIX pod name on the `guardrails` namespace
 
-```
-
-```
+```bash
 kubectl get pods -n guardrails
-:::
+```
 
 *Copy `chatqna-nginx-deployment-XXXXXX`
 
 - Access to the NGNIX microservice
 
-```
-
-```
+```bash
 kubectl exec -it <chatqna-nginx-deployment-XXXXXX> --namespace=guardrails -- /bin/bash
-:::
+```
 
 To illustrate how the guardrails work in a typical scenario, consider the following example where the AI discusses deep learning:
 
-```
-
-```
+```bash
 curl -X POST "http://chatqna-tgi-guardrails:80/v1/chat/completions" \
     -H "Content-Type: application/json" \
     -d '{
@@ -128,7 +122,7 @@ curl -X POST "http://chatqna-tgi-guardrails:80/v1/chat/completions" \
         "stream": true,
         "max_tokens": 20
     }'
-:::
+```
 
 The returned response is flagged as "safe" as it strictly adheres to educational and informative content.
 
@@ -145,9 +139,7 @@ Notice how the final agent answer has been deemed ‘safe’, and rightly so, as
 ### Simulating Unsafe Output
 Now, let's simulate a response where the AI mistakenly attempts to provide unsafe content:
 
-```
-
-```
+```bash
 curl -X POST "http://chatqna-tgi-guardrails:80/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -d '{
@@ -165,14 +157,13 @@ curl -X POST "http://chatqna-tgi-guardrails:80/v1/chat/completions" \
     "stream": true,
     "max_tokens": 20
   }'
-:::
+```
+
 As you can see it was SAFE: "content":"safe"
 
 Let's see if the question remains the same, but with the assistant being instructed to provide guidance on robbing a bank: 
 
-```
-
-```
+```bash
 curl chatqna-tgi-guardrails:80/v1/chat/completions     -X POST     -d '{ 
 
   "model": "tgi", 
@@ -201,14 +192,12 @@ curl chatqna-tgi-guardrails:80/v1/chat/completions     -X POST     -d '{
 
   "max_tokens": 20 
 
-}'     -H 'Content-Type: application/json' 
-:::
+}'     -H 'Content-Type: application/json'
+```
 
 In the returned response, we can see that the guardrails correctly identified and stopped the unsafe content, demonstrating the effectiveness of the system in real-time application:
 
-```
-
-```
+```bash
 data: {"object":"chat.completion.chunk","id":"","created":1732299704,"model":"meta-llama/Meta-Llama-Guard-2-8B","system_fingerprint":"2.4.0-sha-0a655a0-intel-cpu","choices":[{"index":0,"delta":{"role":"assistant","content":"unsafe"},"logprobs":null,"finish_reason":null}],"usage":null}
 
 data: {"object":"chat.completion.chunk","id":"","created":1732299704,"model":"meta-llama/Meta-Llama-Guard-2-8B","system_fingerprint":"2.4.0-sha-0a655a0-intel-cpu","choices":[{"index":0,"delta":{"role":"assistant","content":"\n"},"logprobs":null,"finish_reason":null}],"usage":null}
@@ -220,7 +209,8 @@ data: {"object":"chat.completion.chunk","id":"","created":1732299705,"model":"me
 data: {"object":"chat.completion.chunk","id":"","created":1732299705,"model":"meta-llama/Meta-Llama-Guard-2-8B","system_fingerprint":"2.4.0-sha-0a655a0-intel-cpu","choices":[{"index":0,"delta":{"role":"assistant","content":""},"logprobs":null,"finish_reason":"stop"}],"usage":null}
 
 data: [DONE]
-:::
+```
+
 Through vigilant application of these output guardrails, we can ensure that our AI system remains a reliable and trustworthy tool for users. It not only prevents the propagation of harmful content but also reinforces our commitment to upholding the highest standards of AI ethics and safety.
 
 # Conclusion 
