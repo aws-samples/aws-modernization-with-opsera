@@ -14,7 +14,10 @@ In the UI you can see the chatbot interact with it
 
 To verify the UI, go ahead and ask
 
-    ``````
+    
+```
+
+```
     What is Denvr? Provide short answer?
     :::
 

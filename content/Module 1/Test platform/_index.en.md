@@ -14,7 +14,9 @@ In the UI you can see the chatbot interact with it
 
 To verify the UI, go ahead and ask 
 
-``````
+```
+
+```
 What was Nike's revenue in 2023?
 :::
 
@@ -24,7 +26,9 @@ The answer is **correct** again because we already indexed our knowledge base on
 
 Let's try something different. Will the app be able to answer about OPEA:
 
-``````
+```
+
+```
 What is OPEA?
 :::
 

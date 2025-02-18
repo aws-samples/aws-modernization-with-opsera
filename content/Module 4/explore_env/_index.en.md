@@ -21,7 +21,9 @@ In this deployment when you access the UI the message is sent to the backend bed
 ### Deploying ChatQnA Using Amazon Bedrock LLMs
 For this lab, we've created a changeset with the full parallel deployment of the ChatQnA example in the same Kubernetes cluster you've been using. The following command will deploy pods to the cluster within the "bedrock" namespace that are identical to the original ChatQnA pods, except with Bedrock models instead of TGI. 
 
-``````
+```
+
+```
 aws cloudformation execute-change-set --change-set-name bedrock-change-set --stack-name OpeaBedrockStack
 :::
 
@@ -55,13 +57,18 @@ This module works with just about any text-generation LLM supported by Bedrock, 
 
 ### Confirming Deployment
 Now let's confirm that our Bedrock deployment is complete. You can onitor the state of the Bedrock pods using the ```kubectl``` command:
-``````
+
+```
+
+```
 kubectl get pods -n bedrock
 :::
 
 ...to get output like this:
 
-``````
+```
+
+```
 NAME                                                READY   STATUS    RESTARTS   AGE
 chatqna-bedrock-deployment-5b697d758-7gsdr           1/1     Running   0          28s
 chatqna-chatqna-ui-deployment-7fc549b9b5-jhntn       1/1     Running   0          28s
@@ -77,7 +84,5 @@ chatqna-teirerank-deployment-589dd896d9-xjvmp        1/1     Running   0        
 {{% notice note %}}It can take several minutes for Bedrock to fully initialize and be available. Only continue when you see the `chatqna-bedrock-deployment` pod in the `Running` state.
 {{% /notice %}}
 
-
 You are now able to use Amazon Bedrock in your environment.
-
 

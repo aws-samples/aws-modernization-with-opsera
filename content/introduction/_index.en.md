@@ -55,7 +55,7 @@ For detailed instructions on how to contribute, please check out our [Contributi
 
 - This workshop uses accounts provided by AWS Workshop Studio and can only be used at AWS-run events
 - This workshop uses M7i.24xl instance types. See [here](https://aws.amazon.com/ec2/pricing/on-demand/) for cost information. 
-- This workshop runs in the :param{key=region} :param{key=regionName} region, but you can perform these activities in any region that has proper EC2 capacity.
+- This workshop runs in the ${region} ${regionName} region, but you can perform these activities in any region that has proper EC2 capacity.
 - You are not obligated to provide any personal information as a condition of participating in this workshop
 
 #### Contact

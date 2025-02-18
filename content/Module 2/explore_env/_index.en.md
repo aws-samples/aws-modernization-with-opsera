@@ -34,7 +34,9 @@ If you have been logged out of your CloudShell, click in the CloudShell window t
 
 1. Go to your CloudShell and deploy the ChatQnA-Guardrails ClourFormation template into your EKS Cluster
 
-``````
+```
+
+```
 aws cloudformation execute-change-set --change-set-name guardrails-change-set --stack-name OpeaGuardrailsStack
 :::
 
@@ -43,7 +45,9 @@ aws cloudformation execute-change-set --change-set-name guardrails-change-set --
 
 2. Verify the new namespace was created
 
-``````
+```
+
+```
 kubectl get namespaces 
 :::
 You will see the `guardrails` namespace
@@ -54,7 +58,9 @@ You will see the `guardrails` namespace
 
 Run the following command to check if all the services are running:
 
-``````
+```
+
+```
 kubectl get pods --namespace guardrails
 :::
 

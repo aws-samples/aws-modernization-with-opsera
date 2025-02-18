@@ -35,7 +35,9 @@ For this lab, we've created a changeset with the full parallel deployment of the
 
 **Note** : REPLACE DenvrClientID & DenvrClientSecret for the values you previously got from Denvr.
 
-``````
+```
+
+```
 aws cloudformation execute-change-set --change-set-name remote-inference-change-set --stack-name OpeaRemoteInferenceStack 
 :::
 
@@ -44,7 +46,9 @@ aws cloudformation execute-change-set --change-set-name remote-inference-change-
 
 2. Verify the new services are created
 
-``````
+```
+
+```
 kubectl get pods -n remote-inference
 :::
 
@@ -54,23 +58,35 @@ kubectl get pods -n remote-inference
     
     Access to ngnix POD (copy your NGNIX pod name from kubectl get pods -n remote-inference and REPLACE *chatqna-nginx-xxxxxxxx* on the below command)
 
-    ``````
+    
+```
+
+```
     kubectl exec -it <*POD name:chatqna-nginx-xxxxxxxx*> --namespace=remote-inference -- /bin/bash
     :::
 
     Your command prompt should now indicate that you are inside the container, reflecting the change in environment:
 
-    ``````
+    
+```
+
+```
     root@chatqna-nginx-deployment-xxxxxxxxxxxx:/#
     :::
 
     Get the "What is Deep Learning? Explain in 20 words"*:
 
-    ``````
+    
+```
+
+```
     curl chatqna:8888/v1/chatqna -H 'Content-Type: application/json' -d '{"messages": "What is Deep Learning. Exaplain in 20 words?"}'
     :::
 
-    ``````
+    
+```
+
+```
     data: b' \n'
 
     data: b'Deep'

@@ -23,7 +23,9 @@ In the UI you can see the chatbot to interact with it
 
 4. Check if the model is able to give us an answer about OPEA:
 
-``````
+```
+
+```
 What is OPEA?
 :::
 
@@ -61,5 +63,4 @@ This time, the chat bot responds correctly based on the data it added to the pro
 ## Conclusion 
 
 In this task, you tested the deployment of a RAG-powered chatbot using Bedrock. By uploading relevant context, the model learned and updated its responses based on the new information. This process demonstrated how the integration of RAG allows the system to improve its answers in real-time, leveraging Bedrock.
-
 
