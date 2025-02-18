@@ -70,8 +70,8 @@ root@chatqna-nginx-deployment-xxxxxxxxxxxx:/#
 curl chatqna:8888/v1/chatqna -H 'Content-Type: application/json' -d '{"messages": "What is Deep Learning. Exaplain in 20 words?"}'
 ```
 
-    ```bash
-data: b' \n'
+    :::code{showCopyAction=false}
+    data: b' \n'
 
     data: b'Deep'
 
@@ -114,7 +114,7 @@ data: b' \n'
     data: b''
 
     data: [DONE]
-```
+    :::
     
 4. Verify the deployment is done verifying the new load balancer on your managment console
 

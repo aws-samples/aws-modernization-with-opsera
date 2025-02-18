@@ -155,12 +155,12 @@ curl -X POST "http://chatqna-tgi-guardrails:80/v1/chat/completions" \
     "stream": true,
     "max_tokens": 20
   }'
-```
+:::
 As you can see it was SAFE: "content":"safe"
 
 Let's see if the question remains the same, but with the assistant being instructed to provide guidance on robbing a bank: 
 
-```bash
+:::code{showCopyAction=true language=bash}
 curl chatqna-tgi-guardrails:80/v1/chat/completions     -X POST     -d '{ 
 
   "model": "tgi", 
