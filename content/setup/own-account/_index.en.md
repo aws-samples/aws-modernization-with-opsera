@@ -113,8 +113,8 @@ After updating your kubeconfig, check if you can successfully connect to the clu
 
 4. Test it to see if you can see the nodes associated with the cluster:
 
-```bash
-kubectl get nodes
+::code[```bash
+kubectl get nodes]
 ```
 
 If the command is successful, you should see an output similar to this: 

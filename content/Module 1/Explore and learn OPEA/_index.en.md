@@ -453,8 +453,9 @@ curl http://<**Chatqna-ingress Load Balancer DNS**>/v1/chatqna \
 
 4. Check your results. You will notice the streaming response, which is normal behavior for the microservice as it streams the answer. A streaming response means the data is sent in smaller chunks as it becomes available rather than all at once. In the application, this response is received by the UI and converted into a readable format, allowing the user to view the data as it arrives in real time.
 
-:::code{showCopyAction=false language=bash}
+```
 data: b' The'
+```
 
 data: b' revenue'
 

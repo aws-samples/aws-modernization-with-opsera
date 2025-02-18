@@ -48,8 +48,8 @@ You are now ready to interact with the Kubernetes cluster using `kubectl`
 # Step 3: Verify you can access your cluster:
 After updating your kubeconfig, check if you can successfully connect to the cluster. A simple test is to see if you can see the nodes associated with the cluster:
 
-```bash
-kubectl get nodes
+::code[```bash
+kubectl get nodes]
 ```
 
 If the command is successful, you should see an output similar to this:

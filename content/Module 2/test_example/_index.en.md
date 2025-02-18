@@ -155,12 +155,12 @@ curl -X POST "http://chatqna-tgi-guardrails:80/v1/chat/completions" \
     "stream": true,
     "max_tokens": 20
   }'
-:::
+```
 As you can see it was SAFE: "content":"safe"
 
 Let's see if the question remains the same, but with the assistant being instructed to provide guidance on robbing a bank: 
 
-:::code{showCopyAction=true language=bash}
+```bash
 curl chatqna-tgi-guardrails:80/v1/chat/completions     -X POST     -d '{ 
 
   "model": "tgi", 
@@ -194,8 +194,9 @@ curl chatqna-tgi-guardrails:80/v1/chat/completions     -X POST     -d '{
 
 In the returned response, we can see that the guardrails correctly identified and stopped the unsafe content, demonstrating the effectiveness of the system in real-time application:
 
-:::code{showCopyAction=false language=bash}
+```
 data: {"object":"chat.completion.chunk","id":"","created":1732299704,"model":"meta-llama/Meta-Llama-Guard-2-8B","system_fingerprint":"2.4.0-sha-0a655a0-intel-cpu","choices":[{"index":0,"delta":{"role":"assistant","content":"unsafe"},"logprobs":null,"finish_reason":null}],"usage":null}
+```
 
 data: {"object":"chat.completion.chunk","id":"","created":1732299704,"model":"meta-llama/Meta-Llama-Guard-2-8B","system_fingerprint":"2.4.0-sha-0a655a0-intel-cpu","choices":[{"index":0,"delta":{"role":"assistant","content":"\n"},"logprobs":null,"finish_reason":null}],"usage":null}
 

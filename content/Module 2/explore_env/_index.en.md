@@ -44,8 +44,8 @@ aws cloudformation execute-change-set --change-set-name guardrails-change-set --
 2. Verify the new namespace was created
 
 ```bash
-kubectl get namespaces 
-:::
+kubectl get namespaces
+```
 You will see the `guardrails` namespace
 
 ![namespace](/images/namespace_guard.png)
@@ -54,7 +54,7 @@ You will see the `guardrails` namespace
 
 Run the following command to check if all the services are running:
 
-:::code{showCopyAction=true language=bash}
+```bash
 kubectl get pods --namespace guardrails
 ```
 
