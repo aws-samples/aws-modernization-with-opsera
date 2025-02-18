@@ -127,6 +127,140 @@ To explore the microservices that are not exposed, you will use the nginx pod to
 kubectl exec -it <*POD name:chatqna-nginx-xxxxxxxx*> -- /bin/bash
 ```
 
+Your command prompt should now indicate that you are inside the container, reflecting the change in environment:
+
+```
+root@chatqna-nginx-deployment-xxxxxxxxxxxx:/# 
+```
+
+Once inside, you will now have direct access to the internal pods. 
+
+2. Get the embedding from the Embeddings Microservice for the phrase *"What was Deep Learning?"*:
+
+```bash
+curl chatqna-tei:80/embed \
+    -X POST \
+    -d '{"inputs":"What was Deep Learning?"}' \
+    -H 'Content-Type: application/json'
+```
+
+The answer will be the vector representation of the phrase "What was Deep Learning?". This service returns the vector embedding for the `inputs` from the REST API.
+
+![embeddings](/images/embeddings.png)
+
+### Vector Database Microservice (POD:chatqna-redis-vector-db:80)
+
+The Vector Database microservice is a crucial component in the RAG application as it stores and retrieves embeddings. This is especially useful in applications like ChatQnA (RAG), where relevant information must be retrieved quickly based on the user's query.
+
+#### Using Redis as a Vector Database
+
+In this Task, you use Redis as the vector database. You can find all of the supported alternatives in the [OPEA vector store repository](https://github.com/opea-project/GenAIComps/tree/main/comps/vectorstores)
+
+A Vector Database (VDB) is a specialized database designed to store and manage high-dimensional vectors—numeric representations of data points like words, sentences, or images. In AI and machine learning, these vectors are typically embeddings, which capture the meaning and relationships of data in a format that algorithms can process efficiently, as we have shown before.
+
+### Data Preparation Microservice(POD:chatqna-data-prep:6007)
+
+The Dataprep Microservice is responsible for preparing data in a digestible format for the application, converting it to embeddings, using the embedding microservice, and loading it to the database. This service preprocesses/transforms the data, making sure it is clean, organized, and suitable for further processing.  
+
+Specifically, this microservice receives data (such as documents), processes it by breaking it into chunks, sends it to the embedding microservice, and stores these vectors in the vector database. The microservice's functionality may depend on the specific vector database being used, as each database has its own requirements for data formatting
+
+To test it and help the model answer the initial question **What was Nike revenue in 2023?**, you will need to upload a context file (revenue report) to be processed. 
+
+Execute the following command to download a sample [Nike revenue report](https://github.com/opea-project/GenAIComps/blob/main/comps/retrievers/redis/data/nke-10k-2023.pdf) to the nginx pod (if you are no longer logged in to the NGinx pod, be sure to use the above command to log in again):
+
+1.  Download the document to the microservice :
+
+```bash
+curl -C - -O https://raw.githubusercontent.com/opea-project/GenAIComps/main/comps/third_parties/pathway/src/data/nke-10k-2023.pdf
+```
+
+2.  Feed the knowledge base (Vectord) with the document (It will take ~30 seconds):
+
+```bash
+curl -X POST "chatqna-data-prep:6007/v1/dataprep" \
+     -H "Content-Type: multipart/form-data" \
+     -F "files=@./nke-10k-2023.pdf"
+```
+
+After running the previous command, you should receive a confirmation message like the one below. This command updated the knowledge base by uploading a local file for processing.
+
+```bash
+{
+        "status": 200,
+        "message": "Data preparation succeeded"
+    }
+```
+
+The data preparation microservice API can retrieve information about the list of files stored in the vector database.
+
+3. Verify if the document was uploaded:
+
+```bash
+curl -X POST "chatqna-data-prep:6007/v1/dataprep/get_file" \
+     -H "Content-Type: application/json"
+```
+
+After running the previous command, you should receive the confirmation message. 
+
+```bash
+{
+        "name": "nke-10k-2023.pdf",
+        "id": "nke-10k-2023.pdf",
+        "type": 
+        "File",
+        "parent": ""
+    }
+```
+
+Congratulations! You've successfully prepared your knowledge base. Now you'll explore the microservices involved in prompt handling.
+
+# Step 3: Prompting
+
+Once the knowledge base is set up, you can begin interacting with the application by asking it context-specific questions. RAG plays a crucial role in ensuring the responses are accurate and grounded in relevant data.
+
+The process starts with the application retrieving the most relevant information from the knowledge base in response to the user's query. This step ensures the LLM has up-to-date and precise context to answer the user's query.
+
+Next, the retrieved information is combined with the input prompt that is sent to the Large Language Model (LLM). This enriched prompt allows the model to generate answers that are informed by both the external data and its pre-trained knowledge.
+
+Finally, you will see how the LLM utilizes the enriched prompt to generate a coherent and contextually accurate response. By leveraging RAG, the application effectively delivers answers that are tailored to the user's query, grounded in the most relevant and up-to-date information from the knowledge base.
+
+The microservices involved in this stage are `embeddings`,`vector db`,`retriever`,`reranking` and finally the `LLM`
+
+![Prompting](/images/prompting_2.png)
+
+## Retriever Microservice (POD:chatqna-retriever-usvc:7000)
+
+The Retriever Microservice locates the most relevant information within the knowledge base and returns similar documents to the user's question. It is designed to work with a number of back-end systems that store knowledge and provide APIs to retrieve data that (hopefully!) best matches the intent the user had when asking his or her question. Different knowledge bases provide different APIs for retrieving relevant information. Vector databases provide vector similarity for embeddings from the source documents and a vector embedding for the user's question. Graph databases use graph locality to find matches. Relational databases use string and regular expression matching to find matches.
+
+In this task, you use the Redis vector database and access the vector database through Redis retriever.
+
+Of course, you need to have a vector embedding for the retrieval query. You can generate an embedding for the user's question, **"What was Nike revenue in 2023?"**, to test the retriever against the Nike revenue information you loaded in the previous step. 
+
+To create the embedding, use the `chatqna-tei` microservice (again, make sure you are logged in to the NGinx pod).
+
+1. Create the embedding and save locally (embed_question):
+
+```bash
+embed_question=$(curl chatqna-tei:80/embed \
+    -X POST \
+    -d '{"inputs":"What was the Nike revenue in 2023?"}' \
+    -H 'Content-Type: application/json')
+```
+
+You should get the details about the writing task:
+
+```
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  9571  100  9524  100    47  1097k   5543 --:--:-- --:--:-- --:--:-- 1168k
+```
+
+2. Check to see if your embedding was saved: 
+
+```bash
+echo $embed_question
+```
+
 You should be able to see the vectors the embeddings microservice generated. 
 You are now able to use the retriever microservice to get the most similar information from your knowledge base. 
 
