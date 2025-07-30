@@ -1,0 +1,271 @@
+Parameters:
+  HuggingFaceToken:
+    Type: String
+    Description: A valid Hugging Face Token to access Hugging Face LLM's, make sure to add the `meta-llama/Meta-Llama-Guard-2-8B` model to your token scope in order for "ChatQnA Guardrails" to work.
+  OpeaRoleArn:
+    Type: String
+    Default: ""
+    Description: "OPTIONAL: Arn of the role or user you're using in your account. If you're using root use \"arn:aws:iam::MY-ACCOUNT-ID:root\". If the role arn contains the phrase \"assumed-role\", just put the role name (The part before the forward slash. e.g. for MY_ROLE/MY_NAME use MY_ROLE)"
+  RemoteInferenceClientId:
+    Type: String
+    Default: ""
+    Description: "OPTIONAL: If you have an \"Inference API\" account, put your client id here to integrate it with your Opea Cluster. If you don't have a Remote Inference account, leave this blank."
+  RemoteInferenceClientSecret:
+    Type: String
+    Default: ""
+    Description: "OPTIONAL: If you have an \"Inference API\" account, put your client secret here to integrate it with your Opea Cluster. If you don't have a Remote Inference account, leave this blank."
+  RemoteInferenceURL:
+    Type: String
+    Default: ""
+    Description: "OPTIONAL: If you have an \"Inference API\" account, put your URL here to integrate it with your Opea Cluster. If you don't have a Remote Inference account, leave this blank."
+  ModelId:
+    Type: String
+    Description: "Id of the model to be used for inference."
+    Default: "Intel/neural-chat-7b-v3-3"
+Resources:
+  WSCodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+        Version: "2012-10-17"
+      Description: Workshop Studio CodeBuild Service Role
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AdministratorAccess
+  WSCodeBuildServiceRoleDefaultPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Effect: Allow
+            Resource:
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":logs:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :log-group:/aws/codebuild/
+                    - Ref: InstallWorkshopStack
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":logs:"
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - :log-group:/aws/codebuild/
+                    - Ref: InstallWorkshopStack
+          - Action:
+              - codebuild:CreateReportGroup
+              - codebuild:CreateReport
+              - codebuild:UpdateReport
+              - codebuild:BatchPutTestCases
+              - codebuild:BatchPutCodeCoverages
+            Effect: Allow
+            Resource:
+              Fn::Join:
+                - ""
+                - - "arn:"
+                  - Ref: AWS::Partition
+                  - ":codebuild:"
+                  - Ref: AWS::Region
+                  - ":"
+                  - Ref: AWS::AccountId
+                  - :report-group/
+                  - Ref: InstallWorkshopStack
+                  - -*
+        Version: "2012-10-17"
+      PolicyName: WSCodeBuildServiceRoleDefaultPolicy
+      Roles:
+        - Ref: WSCodeBuildServiceRole
+  CodeBuildTriggerLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      Description: role for lambda to trigger codebuild
+      ManagedPolicyArns:
+        - Ref: CodeBuildTriggerLambdaRolePolicy
+  CodeBuildTriggerLambdaRolePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - codebuild:StartBuild
+              - codebuild:StopBuild
+              - codebuild:BatchGetBuilds
+            Effect: Allow
+            Resource: "*"
+          - Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Effect: Allow
+            Resource: "*"
+        Version: "2012-10-17"
+      Description: role policy for lambda to trigger codebuild
+      Path: /
+  InstallWorkshopStack:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        EnvironmentVariables:
+          - Name: HUGGING_FACE_TOKEN
+            Type: PLAINTEXT
+            Value:
+              Ref: HuggingFaceToken
+          - Name: REMOTE_INFERENCE_CLIENT_ID
+            Type: PLAINTEXT
+            Value:
+              Ref: RemoteInferenceClientId
+          - Name: REMOTE_INFERENCE_CLIENT_SECRET
+            Type: PLAINTEXT
+            Value:
+              Ref: RemoteInferenceClientSecret
+          - Name: REMOTE_INFERENCE_URL
+            Type: PLAINTEXT
+            Value:
+              Ref: RemoteInferenceURL
+          - Name: OPEA_ROLE_ARN
+            Type: PLAINTEXT
+            Value:
+              Ref: OpeaRoleArn
+          - Name: MODEL_ID
+            Type: PLAINTEXT
+            Value: 
+              Ref: ModelId
+        Image: aws/codebuild/standard:7.0
+        ImagePullCredentialsType: CODEBUILD
+        PrivilegedMode: true
+        Type: LINUX_CONTAINER
+      ServiceRole:
+        Fn::GetAtt:
+          - WSCodeBuildServiceRole
+          - Arn
+      Source:
+        BuildSpec: |-
+          {
+            "version": "0.2",
+            "env": {
+              "shell": "bash"
+            },
+            "phases": {
+              "build": {
+                "commands": [
+                  "npm install -g aws-cdk",
+                  "mkdir workshop && cd workshop",
+                  "git clone --single-branch --branch for-custom-accounts https://github.com/opea-aws-proserve/opea-demo-builder.git .",
+                  "rm -fr ./assets/genai-examples && git clone https://github.com/opea-project/GenAIExamples.git ./assets/genai-examples",
+                  "echo $EVENT_REQUEST_TYPE",
+                  "chmod +x ./lib/app/bin/start.sh",
+                  "./lib/app/bin/start.sh $EVENT_REQUEST_TYPE"
+                ]
+              },
+              "post_build": {
+                "commands": [
+                  "if [ \"$CODEBUILD_BUILD_SUCCEEDING\" == \"1\" ]; then export STATUS=\"SUCCESS\"; fi",
+                  "if [ \"$CODEBUILD_BUILD_SUCCEEDING\" != \"1\" ]; then export STATUS=\"FAILED\"; fi",
+                  'export JSON_DATA="{\"Status\" : \"$STATUS\", \"Reason\" : \"See the details in CloudWatch Log Stream: $CONTEXT_LOG_STREAM_NAME\", \"StackId\" : \"$EVENT_STACK_ID\", \"PhysicalResourceId\" : \"$CONTEXT_LOG_STREAM_NAME\", \"RequestId\" : \"$EVENT_REQUEST_ID\", \"LogicalResourceId\" : \"$EVENT_LOGICAL_RESOURCE_ID\" }"',
+                  'echo "$JSON_DATA"',
+                  "curl -X PUT --data-binary \"$JSON_DATA\" \"$EVENT_RESPONSE_URL\""
+                ]
+              }
+            }
+          }
+        Type: NO_SOURCE
+      Cache:
+        Type: NO_CACHE
+      EncryptionKey: alias/aws/s3
+      TimeoutInMinutes: 60
+  TriggerCodeBuild:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: |-
+          import boto3
+          import os
+
+          def lambda_handler(event, context):
+              print(event)
+              project_name = os.environ.get("PROJECT_NAME")
+              cb_cli = boto3.client("codebuild")
+              cb_env_vars = [
+                  {
+                      'name': 'EVENT_REQUEST_TYPE',
+                      'value': event['RequestType'],
+                      'type': 'PLAINTEXT'
+                  },
+                  {
+                      'name': 'EVENT_REQUEST_ID',
+                      'value': event['RequestId'],
+                      'type': 'PLAINTEXT'
+                  },
+                  {
+                      'name': 'EVENT_STACK_ID',
+                      'value': event['StackId'],
+                      'type': 'PLAINTEXT'
+                  },
+                  {
+                      'name': 'EVENT_LOGICAL_RESOURCE_ID',
+                      'value': event['LogicalResourceId'],
+                      'type': 'PLAINTEXT'
+                  },
+                  {
+                      'name': 'EVENT_RESPONSE_URL',
+                      'value': event['ResponseURL'],
+                      'type': 'PLAINTEXT'
+                  },
+                  {
+                      'name': 'CONTEXT_LOG_STREAM_NAME',
+                      'value': context.log_stream_name,
+                      'type': 'PLAINTEXT'
+                  },
+              ]
+              cb_cli.start_build(projectName=project_name, environmentVariablesOverride=cb_env_vars)
+      Role:
+        Fn::GetAtt:
+          - CodeBuildTriggerLambdaRole
+          - Arn
+      Environment:
+        Variables:
+          PROJECT_NAME:
+            Ref: InstallWorkshopStack
+      Handler: index.lambda_handler
+      Runtime: python3.11
+      Timeout: 900
+    DependsOn:
+      - CodeBuildTriggerLambdaRole
+  CustomProvisioningResource:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+          - TriggerCodeBuild
+          - Arn
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete

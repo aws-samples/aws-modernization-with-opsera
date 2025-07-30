@@ -1,0 +1,4 @@
+content/assets
+node_modules
+etc
+.DS_Store

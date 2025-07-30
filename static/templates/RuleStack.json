@@ -1,0 +1,141 @@
+{
+    "Resources": {
+     "topic69831491": {
+      "Type": "AWS::SNS::Topic",
+      "Properties": {
+       "DisplayName": "Reinvent-Opea-Notify",
+       "TopicName": "Reinvent-Opea-Notify"
+      },
+      "Metadata": {
+       "aws:cdk:path": "OpeaRuleStack/topic/Resource"
+      }
+     },
+     "topicPolicyBC9D8025": {
+      "Type": "AWS::SNS::TopicPolicy",
+      "Properties": {
+       "PolicyDocument": {
+        "Statement": [
+         {
+          "Action": "sns:Publish",
+          "Effect": "Allow",
+          "Principal": {
+           "Service": "events.amazonaws.com"
+          },
+          "Resource": {
+           "Ref": "topic69831491"
+          },
+          "Sid": "0"
+         }
+        ],
+        "Version": "2012-10-17"
+       },
+       "Topics": [
+        {
+         "Ref": "topic69831491"
+        }
+       ]
+      },
+      "Metadata": {
+       "aws:cdk:path": "OpeaRuleStack/topic/Policy/Resource"
+      }
+     },
+     "subscriptionD5B264BF": {
+      "Type": "AWS::SNS::Subscription",
+      "Properties": {
+       "Endpoint": "sguggenh@amazon.com",
+       "Protocol": "email",
+       "TopicArn": {
+        "Ref": "topic69831491"
+       }
+      },
+      "Metadata": {
+       "aws:cdk:path": "OpeaRuleStack/subscription/Resource"
+      }
+     },
+     "subscription235821D23": {
+      "Type": "AWS::SNS::Subscription",
+      "Properties": {
+       "Endpoint": "stevenguggen@gmail.com",
+       "Protocol": "email",
+       "TopicArn": {
+        "Ref": "topic69831491"
+       }
+      },
+      "Metadata": {
+       "aws:cdk:path": "OpeaRuleStack/subscription2/Resource"
+      }
+     },
+     "subscription3CECA7A1F": {
+      "Type": "AWS::SNS::Subscription",
+      "Properties": {
+       "Endpoint": "+15042356883",
+       "Protocol": "sms",
+       "TopicArn": {
+        "Ref": "topic69831491"
+       }
+      },
+      "Metadata": {
+       "aws:cdk:path": "OpeaRuleStack/subscription3/Resource"
+      }
+     },
+     "ruleF2C1DCDC": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+       "EventPattern": {
+        "source": [
+         "aws.cloudformation"
+        ],
+        "detail-type": [
+         "CloudFormation Stack Status Change"
+        ],
+        "region": [
+         "us-east-2"
+        ],
+        "detail": {
+         "status-details": {
+          "status": [
+           "CREATE_COMPLETE",
+           "CREATE_FAILED",
+           "REVIEW_IN_PROGRESS",
+           "ROLLBACK_IN_PROGRESS",
+           "UPDATE_FAILED",
+           "DELETE_IN_PROGRESS"
+          ]
+         }
+        }
+       },
+       "Name": "Reinvent-Opea-Notify-Updates",
+       "State": "ENABLED",
+       "Targets": [
+        {
+         "Arn": {
+          "Ref": "topic69831491"
+         },
+         "Id": "Target0",
+         "InputTransformer": {
+          "InputPathsMap": {
+           "account": "$.account",
+           "detail-stack-id": "$.detail.stack-id",
+           "detail-status-details-status": "$.detail.status-details.status",
+           "detail-status-details-status-reason": "$.detail.status-details.status-reason"
+          },
+          "InputTemplate": "\"In account <account>, stack <detail-stack-id> just reached CloudFormation status <detail-status-details-status> for the following reason: <detail-status-details-status-reason>\""
+         }
+        }
+       ]
+      },
+      "Metadata": {
+       "aws:cdk:path": "OpeaRuleStack/rule/Resource"
+      }
+     },
+     "CDKMetadata": {
+      "Type": "AWS::CDK::Metadata",
+      "Properties": {
+       "Analytics": "v2:deflate64:H4sIAAAAAAAA/02JQQ6CMBBFz8K+jMACD+AFDLgnZRiTAWwJ00JM07ubgjFu/nv//wrKuoYi07vkOEz5zD2E1mmclN6lC2IEwsMujOr2NKccebcz4/s3fmvre8GVF8fWpO+/R0UbGScQGj9TehNjPIzE+hUpKmMHglEuW1VAeYUiG4U5X71x/CJoTn4ADkr3C7YAAAA="
+      },
+      "Metadata": {
+       "aws:cdk:path": "OpeaRuleStack/CDKMetadata/Default"
+      }
+     }
+    }
+   }

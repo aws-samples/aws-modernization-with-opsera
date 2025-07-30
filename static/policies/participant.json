@@ -1,0 +1,29 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [{
+        "Effect": "Allow",
+        "Action": [
+            "eks:*",
+            "ec2:*",
+            "logs:*",
+            "cloudwatch:*",
+            "cloudshell:*",
+            "elasticloadbalancing:*",
+            "ssm:*",
+            "cloudformation:*",
+            "ecr:*",
+            "ecr-public:*",
+            "bedrock:*",
+            "lambda:*",
+            "s3:*",
+            "rds:*",
+            "aws-marketplace:*"
+        ],
+        "Resource": "*"
+    },
+    {
+        "Effect": "Allow",
+        "Action": "sts:AssumeRole",
+        "Resource": "arn:aws:iam::976193265124:role/ecr-opea"
+    }]
+}
